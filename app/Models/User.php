@@ -77,5 +77,10 @@ class User extends Authenticatable
     {
         return $this->hasMany(Otp::class);
     }
-
+    public function committees()
+    {
+    return $this->belongsToMany(Committee::class, 'committee_members')
+    ->withPivot('role')
+    ->withTimestamps();
+    }
 }
