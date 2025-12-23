@@ -11,8 +11,19 @@ use Illuminate\Support\Facades\Validator;
 use App\Models\User;
 class CommitteeController extends Controller
 {
+    public function index()
+    {
+    $committees = Committee::query()
+        ->select('id', 'name', 'description')
+        ->withCount('members') 
+        ->get();
 
-    public function store(Request $request)
+    return response()->json([
+        'status' => true,
+        'data'   => $committees
+    ], 200);
+    }
+   public function store(Request $request)
     {
         $validator = Validator::make($request->all(), [
             'name'         => 'required|string|max:255',
@@ -92,6 +103,119 @@ class CommitteeController extends Controller
             'data' => $users
         ], 200);
     }
+    public function update(Request $request, $id)
+    {
+    $validator = Validator::make($request->all(), [
+        'name'         => 'required|string|max:255',
+        'description'  => 'nullable|string',
+        'users'        => 'required|array|min:1',
+        'users.*'      => 'integer|exists:users,id',
+        'chairman_id'  => 'required|integer|exists:users,id',
+    ]);
+
+    if ($validator->fails()) {
+        return response()->json([
+            'status' => false,
+            'errors' => $validator->errors()
+        ], 422);
+    }
+
+    if (!in_array($request->chairman_id, $request->users)) {
+        return response()->json([
+            'status' => false,
+            'message' => 'Chairman must be included in users list'
+        ], 422);
+    }
+
+    try {
+        DB::transaction(function () use ($request, $id) {
+
+            $committee = Committee::findOrFail($id);
+
+            // Update committee info
+            $committee->update([
+                'name'        => $request->name,
+                'description' => $request->description,
+            ]);
+
+            // Current committee users
+            $currentUsers = CommitteeMember::where('committee_id', $committee->id)
+                ->pluck('user_id')
+                ->toArray();
+
+            $newUsers = $request->users;
+
+            // Users to add & remove
+            $usersToAdd    = array_diff($newUsers, $currentUsers);
+            $usersToRemove = array_diff($currentUsers, $newUsers);
+
+            if (!empty($usersToAdd)) {
+                $alreadyAssigned = CommitteeMember::whereIn('user_id', $usersToAdd)
+                    ->where('committee_id', '!=', $committee->id)
+                    ->pluck('user_id')
+                    ->toArray();
+
+                if (!empty($alreadyAssigned)) {
+                    throw new \Exception(
+                        'Users already assigned to another committee: ' . implode(', ', $alreadyAssigned)
+                    );
+                }
+            }
+
+            $insertData = [];
+            foreach ($usersToAdd as $userId) {
+                $insertData[] = [
+                    'committee_id' => $committee->id,
+                    'user_id'      => $userId,
+                    'role'         => $userId == $request->chairman_id ? 'chairman' : 'member',
+                    'created_at'   => now(),
+                    'updated_at'   => now(),
+                ];
+            }
+
+            if (!empty($insertData)) {
+                CommitteeMember::insert($insertData);
+            }
+
+            if (!empty($usersToRemove)) {
+                CommitteeMember::where('committee_id', $committee->id)
+                    ->whereIn('user_id', $usersToRemove)
+                    ->delete();
+            }
+
+            CommitteeMember::where('committee_id', $committee->id)
+                ->update(['role' => 'member']);
+
+            CommitteeMember::where('committee_id', $committee->id)
+                ->where('user_id', $request->chairman_id)
+                ->update(['role' => 'chairman']);
+        });
+
+        return response()->json([
+            'status' => true,
+            'message' => 'Committee updated successfully'
+        ], 200);
+
+    } catch (\Exception $e) {
+        return response()->json([
+            'status' => false,
+            'message' => $e->getMessage()
+        ], 400);
+    }
     
+    }
+    function view($id){
+    $committee = Committee::with('members.user')->find($id);
+    if (!$committee) {
+        return response()->json([
+            'status' => false,
+            'message' => 'Committee not found'
+        ], 404);
+    }
+        return response()->json([
+            'status' => true,
+            'data' => $committee
+        ], 200);
+    }
 
 }
