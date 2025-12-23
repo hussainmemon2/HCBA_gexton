@@ -94,4 +94,10 @@ class User extends Authenticatable
     {
         return $this->hasMany(ComplaintRemark::class);
     }
+    public function isChairman()
+    {
+        return $this->committees()
+        ->wherePivot('role', 'chairman')
+        ->exists();
+    }
 }

@@ -17,7 +17,7 @@ return new class extends Migration
     $table->text('description');
     $table->foreignId('committee_id')->constrained()->cascadeOnDelete();
     $table->foreignId('created_by')->constrained('users')->cascadeOnDelete();
-    $table->enum('status', ['open', 'closed', 'reopened'])->default('open');
+    $table->enum('status', ['open', 'closed', 'reopened','rejected'])->default('open');
     $table->boolean('user_satisfied')->nullable();
     $table->timestamp('closed_at')->nullable();
     $table->timestamps();

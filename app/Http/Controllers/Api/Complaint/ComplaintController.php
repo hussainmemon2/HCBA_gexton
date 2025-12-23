@@ -13,12 +13,41 @@ use Illuminate\Support\Str;
 
 class ComplaintController extends Controller
 {
+    public function index(Request $request)
+    {
+    $user = $request->user();
+    $query = Complaint::query()
+    ->with([
+        'creator:id,name',
+        'committee:id,name',
+        'attachments',
+        'remarks.user:id,name'
+    ])
+    ->latest();
 
-public function index(Request $request){
-$user = $request->user();
-return $user->complaints()->with('committee.members' )->withCount('remarks')->get();
+    if ($user->role === 'admin') {
 
-}
+    }
+
+    elseif ($this->isChairman($user)) {
+
+    $committeeIds = $user->committees()
+        ->wherePivot('role', 'chairman')
+        ->pluck('committees.id');
+
+    $query->whereIn('committee_id', $committeeIds);
+    }
+
+    else {
+    $query->where('created_by', $user->id);
+    }
+
+    return response()->json([
+    'status' => true,
+    'data'   => $query->get()
+    ]);
+    }
+
 public function store(Request $request)
 {
     $validator = Validator::make($request->all(), [
@@ -28,13 +57,13 @@ public function store(Request $request)
         'attachments'  => 'nullable|array',
         'attachments.*'=> 'file|max:5120', // 5MB
     ]);
-    $user = $request->user();
     if ($validator->fails()) {
         return response()->json([
             'status'  => false,
             'message' => $validator->errors()->first()
         ], 422);
     }
+    $user = $request->user();
 
     DB::beginTransaction();
 
@@ -94,4 +123,10 @@ $committees = Committee::all(['id', 'name']);
 return response()->json(['data' => $committees]);
 }
 
+private function isChairman($user)
+{
+    return $user->committees()
+        ->wherePivot('role', 'chairman')
+        ->exists();
+}
 }
