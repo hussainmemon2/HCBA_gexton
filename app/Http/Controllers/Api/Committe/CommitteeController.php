@@ -204,18 +204,37 @@ class CommitteeController extends Controller
     }
     
     }
-    function view($id){
-    $committee = Committee::with('members.user')->find($id);
+public function view($id)
+{
+    $committee = Committee::query()
+        ->select('id', 'name', 'description')
+        ->with([
+            'members' => function ($q) {
+                $q->select('id', 'committee_id', 'user_id', 'role');
+            },
+            'members.user' => function ($q) {
+                $q->select(
+                    'id',
+                    'name',
+                    'email',
+                    'passport_image'
+                );
+            }
+        ])
+        ->find($id);
+
     if (!$committee) {
         return response()->json([
             'status' => false,
             'message' => 'Committee not found'
         ], 404);
     }
-        return response()->json([
-            'status' => true,
-            'data' => $committee
-        ], 200);
-    }
+
+    return response()->json([
+        'status' => true,
+        'data'   => $committee
+    ], 200);
+}
+
 
 }
