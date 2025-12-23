@@ -24,7 +24,6 @@ return new class extends Migration
     $table->index(['committee_id', 'status']);
     });
     }
-
     /**
      * Reverse the migrations.
      */

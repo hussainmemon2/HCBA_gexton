@@ -13,17 +13,13 @@ return new class extends Migration
     {
         Schema::create('complaint_attachments', function (Blueprint $table) {
         $table->id();
-
         $table->foreignId('complaint_id')->constrained()->cascadeOnDelete();
         $table->foreignId('uploaded_by')->constrained('users')->cascadeOnDelete();
-
         $table->string('filename');
         $table->string('file_path');
-
         $table->timestamps();
         });
     }
-
     /**
      * Reverse the migrations.
      */
