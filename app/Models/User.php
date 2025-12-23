@@ -7,8 +7,10 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 Use App\Models\Otp;
+Use App\Models\Committee;
+Use App\Models\Complaint;
+Use App\Models\ComplaintRemark;
 use Laravel\Sanctum\HasApiTokens;
-
 class User extends Authenticatable
 {
     /** @use HasFactory<\Database\Factories\UserFactory> */
@@ -82,5 +84,14 @@ class User extends Authenticatable
     return $this->belongsToMany(Committee::class, 'committee_members')
     ->withPivot('role')
     ->withTimestamps();
+    }
+    public function complaints()
+    {
+      return $this->hasMany(Complaint::class, 'created_by');
+    }
+
+    public function complaintRemarks()
+    {
+        return $this->hasMany(ComplaintRemark::class);
     }
 }
