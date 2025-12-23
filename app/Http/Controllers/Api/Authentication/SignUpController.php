@@ -98,7 +98,7 @@ class SignUpController extends Controller
     }
 
         // Create user directory using CNIC
-        $cnicSlug = Str::slug($request->cnic);
+        $cnicSlug = Str::slug($request->name.'_'.time());
         $path = public_path("users/files/{$cnicSlug}");
 
         if (!file_exists($path)) {
