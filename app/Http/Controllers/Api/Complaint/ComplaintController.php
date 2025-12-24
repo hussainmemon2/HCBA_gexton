@@ -27,8 +27,10 @@ class ComplaintController extends Controller
             'remarks.user:id,name'
         ])
         ->latest();
-
-        if ($isChairman) {
+        if ($user->role == 'admin') {
+        // Admin can see all complaints
+        }
+        elseif ($isChairman) {
 
         $committeeIds = $user->committees()
             ->wherePivot('role', 'chairman')
@@ -45,6 +47,7 @@ class ComplaintController extends Controller
         return response()->json([
         'status'      => true,
         'is_chairman' => $isChairman,
+        'is_admin'    => $user->role == 'admin',
         'data'        => $complaints->map(function ($complaint) use ($user, $isChairman) {
 
             return [
