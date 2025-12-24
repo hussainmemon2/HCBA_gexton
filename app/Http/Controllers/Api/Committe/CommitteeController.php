@@ -94,7 +94,7 @@ class CommitteeController extends Controller
         $users = User::whereNotIn('id', function ($query) {
                 $query->select('user_id')
                     ->from('committee_members');
-            })
+            })->where('role', 'member')
             ->select('id', 'name', 'email' , 'cnic')
             ->get();
 
