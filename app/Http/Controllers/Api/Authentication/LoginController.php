@@ -67,7 +67,7 @@ class LoginController extends Controller
         return response()->json([
             'status'  => 'success',
             'message' => 'OTP sent. Please verify to continue login.',
-            "email"   => $user->email
+            "email"   => $user->email,
         ], 200);
     }
     public function sendotp(Request $request)

@@ -45,7 +45,7 @@ class User extends Authenticatable
         'email',
         'phone',
         'password',
-        'role_id',
+        'role',
         'is_verified_nadra',
         'is_verified_hcb',
         'status',
