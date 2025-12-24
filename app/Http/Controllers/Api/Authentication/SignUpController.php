@@ -222,10 +222,8 @@ class SignUpController extends Controller
             'type'        => 'register',
             'expires_at'  => $expiresAt,
         ]);
-
         Mail::to($user->email)
-            ->later(now()->addMinute(), new VerifyEmail($otpCode, $user->name));
-
+        ->queue(new VerifyEmail($otpCode, $user->name));
         return response()->json([
             'status'  => 'success',
             'message' => 'OTP sent successfully. Please check your email.',

@@ -57,8 +57,8 @@ class ResetController extends Controller
     'expires_at' => now()->addMinutes(5),
     ]);
 
-    Mail::to($user->email)
-    ->later(now()->addMinute(), new ResetPasswordOtpMail($otpCode, $user->name));
+     Mail::to($user->email)
+        ->queue(new ResetPasswordOtpMail($otpCode, $user->name));
 
     return response()->json([
     'status' => 'success',

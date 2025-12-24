@@ -61,8 +61,8 @@ class LoginController extends Controller
             'expires_at' => now()->addMinutes(5),
         ]);
 
-        Mail::to($user->email)
-            ->later(now()->addMinute(), new LoginOtpMail($otpCode, $user->name));
+         Mail::to($user->email)
+        ->queue( new LoginOtpMail($otpCode, $user->name));
 
         return response()->json([
             'status'  => 'success',
@@ -118,8 +118,8 @@ class LoginController extends Controller
         'expires_at' => now()->addMinutes(5),
     ]);
 
-    Mail::to($user->email)
-        ->later(now()->addMinute(), new LoginOtpMail($otpCode, $user->name));
+     Mail::to($user->email)
+        ->queue( new LoginOtpMail($otpCode, $user->name));
 
     return response()->json([
         'status' => 'success',

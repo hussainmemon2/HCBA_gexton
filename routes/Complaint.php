@@ -7,7 +7,8 @@ Route::middleware('api.auth')->controller(ComplaintController::class)->prefix('c
     Route::get('/' , 'index');
     Route::post('/create' , 'store');
     Route::get('/committes' , 'committes');
+    Route::get('/view/{id}' , 'show');
+    Route::post('/add-remark/{id}' , 'addRemark');
+    Route::post('/close/{id}' , 'close');
+    Route::post('/satisfaction-feedback/{id}' , 'respondSatisfaction');
 });
-
-// test auth token 
-// 1|rfuKU56YUXz6b4Fh4q6jWWNXW9ZYu9fnySS0miUO04c99abd
