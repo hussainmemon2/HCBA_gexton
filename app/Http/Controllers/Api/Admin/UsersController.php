@@ -14,10 +14,23 @@ use Carbon\Carbon;
 use Illuminate\Support\Str;
 class UsersController extends Controller
 {
-   function index(Request $request){
-    $users = User::where('role', 'member')->paginate(25); 
-    return response()->json($users);
-   }
+    public function index(Request $request)
+    {
+        $query = User::where('role', 'member');
+        // Search filter
+        if ($request->filled('search')) {
+            $search = $request->search;
+            $query->where(function ($q) use ($search) {
+                $q->where('name', 'like', "%{$search}%")
+                ->orWhere('email', 'like', "%{$search}%")
+                ->orWhere('cnic', 'like', "%{$search}%");
+            });
+        }
+        // Pagination per page
+        $perPage = (int) $request->get('per_page', 25);
+        $users = $query->paginate($perPage);
+        return response()->json($users);
+    }
     public function store(Request $request)
     {
      $validator = Validator::make($request->all(), [

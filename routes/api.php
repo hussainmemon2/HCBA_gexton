@@ -9,4 +9,4 @@ require __DIR__ . '/Auth.php';
 require __DIR__ . '/Committe.php';
 require __DIR__ . '/Complaint.php';
 require __DIR__ . '/Admin.php';
-
+require __DIR__ . '/Finance.php';

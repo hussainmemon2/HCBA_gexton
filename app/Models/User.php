@@ -10,7 +10,9 @@ Use App\Models\Otp;
 Use App\Models\Committee;
 Use App\Models\Complaint;
 Use App\Models\ComplaintRemark;
+Use App\Models\FinanceTransaction;
 use Laravel\Sanctum\HasApiTokens;
+
 class User extends Authenticatable
 {
     /** @use HasFactory<\Database\Factories\UserFactory> */
@@ -99,5 +101,13 @@ class User extends Authenticatable
         return $this->committees()
         ->wherePivot('role', 'chairman')
         ->exists();
+    }
+    public function financeTransactions()
+    {
+         return $this->hasMany(FinanceTransaction::class, 'member_id');
+    }
+    public function createdTransactions()
+    {
+     return $this->hasMany(FinanceTransaction::class, 'created_by');
     }
 }
