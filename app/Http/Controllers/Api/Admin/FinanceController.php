@@ -92,13 +92,26 @@ class FinanceController extends Controller
         if ($request->filled('to_date')) {
             $query->where('transaction_date', '<=', $request->to_date);
         }
+        $totalFunding =FinanceTransaction::where('transaction_type', 'funding')->sum('amount');
+        $totalExpenses =FinanceTransaction::where('transaction_type', 'expense')->sum('amount');
+        $availableBalance = $totalFunding - $totalExpenses;
 
         // Pagination
         $transactions = $query->paginate($request->get('per_page', 20));
 
         return response()->json([
             'status' => true,
-            'data' => $transactions
+            'total_funding' => $totalFunding,
+            'total_expenses' => $totalExpenses,
+            'available_balance' => $availableBalance,
+            'data' => $transactions->items(), // only transaction items
+            'pagination' => [
+            'current_page' => $transactions->currentPage(),
+            'per_page' => $transactions->perPage(),
+            'total' => $transactions->total(),
+            'last_page' => $transactions->lastPage(),
+            "links"     => $transactions->linkCollection(),
+            ],
         ]);
     }
 }
