@@ -12,6 +12,8 @@ Use App\Models\Complaint;
 Use App\Models\ComplaintRemark;
 Use App\Models\FinanceTransaction;
 use Laravel\Sanctum\HasApiTokens;
+use App\Models\WelfareClaim;
+use App\Models\Borrowing;
 
 class User extends Authenticatable
 {
@@ -110,4 +112,14 @@ class User extends Authenticatable
     {
      return $this->hasMany(FinanceTransaction::class, 'created_by');
     }
+    public function welfareClaims()
+    {
+        return $this->hasMany(WelfareClaim::class);
+    }
+
+    public function borrowings()
+    {
+        return $this->hasMany(Borrowing::class);
+    }
+
 }

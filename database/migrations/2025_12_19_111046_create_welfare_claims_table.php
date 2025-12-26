@@ -16,13 +16,14 @@ return new class extends Migration
         Schema::create('welfare_claims', function (Blueprint $table) {
             $table->id();
             // user who is claiming for another user
-            $table->foreignId('claimer_id')->constrained();
+            $table->foreignId('claimer_id')->constrained('users');
             $table->foreignId('user_id')->constrained();
             $table->enum('type', ["medical","death","others"]);
             $table->decimal('amount', 10, 2)->nullable();
-            $table->text('reason')->comment('provided_by_admin')->nullable();
+            $table->text('reason')->comment('provided_by_user')->nullable();
             $table->date('received_date')->nullable();
             $table->date('approved_date')->nullable();
+            $table->date('rejected_date')->nullable();
             $table->date('funding_date')->comment('denoting when funding started')->nullable();
             // picked or rejected it cant be made again its closed
             //  time between these date will denote for how much time funding rasise and ended
