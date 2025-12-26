@@ -11,7 +11,7 @@ use App\Http\Controllers\Welfare\WelfareClaimController;
 use App\Http\Controllers\Library\BorrowingLibraryItemController;
 
 
-Route::middleware('auth:sanctum')->group(function () {
+Route::middleware('api.auth')->group(function () {
     Route::controller(UserController::class)->prefix('user')->group(function () {
         Route::post('fetchUserViaCnic', 'fetchUserViaCnic')->name('fetchUserViaCnic');
     });
