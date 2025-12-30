@@ -37,6 +37,7 @@ Route::middleware('api.auth')->group(function () {
 });
 
 require __DIR__ . '/Auth.php';
+require __DIR__ . '/Announcement.php';
 require __DIR__ . '/Committe.php';
 require __DIR__ . '/Complaint.php';
 require __DIR__ . '/Admin.php';

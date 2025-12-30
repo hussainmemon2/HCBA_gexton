@@ -3,15 +3,18 @@
 namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Http\Request;
 
 class WelfareRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
      */
-    public function authorize(): bool
+    public function authorize(Request $request): bool
     {
-      return true;
+        $isAuthenticated = (bool) $request->user();
+
+        return $isAuthenticated;
     }
 
     /**
@@ -37,7 +40,7 @@ class WelfareRequest extends FormRequest
             // 'remark' => ['required_if:status,rejected,approved,funding,ready,collected', 'string'],
 
             'received_date' => ['nullable', 'date'],
-            'reason'=>['required'],
+            'reason' => ['required'],
 
             'status' => ['nullable', 'in:received'],
 

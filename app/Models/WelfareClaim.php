@@ -6,8 +6,6 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
-use App\Models\User;
-use App\Models\FinanceTransaction;
 
 class WelfareClaim extends Model
 {
@@ -63,9 +61,19 @@ class WelfareClaim extends Model
     {
         return $this->belongsTo(User::class, 'claimer_id');
     }
+
+    public function attachments(): HasMany
+    {
+        return $this->hasMany(WelfareClaimAttachment::class);
+    }
+
+    public function remarks(): HasMany
+    {
+        return $this->hasMany(WelfareClaimRemark::class);
+    }
+
     public function financeTransactions()
     {
         return $this->hasMany(FinanceTransaction::class);
     }
-
 }

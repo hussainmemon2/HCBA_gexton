@@ -41,9 +41,7 @@ class DatabaseSeeder extends Seeder
             'district_bar_member' => "0",
             'other_bar_member' => "0",
             'phone' => "0",
-            'status' => 'active',
-            "email_verified_at" => now(),
-            "email_verified"=> true,
+            'status' => 'active'
         ]);
     }
 }

@@ -4,13 +4,14 @@ namespace App\Http\Requests;
 
 use App\Models\Borrowing;
 use Illuminate\Foundation\Http\FormRequest;
-use Illuminate\Validation\Rule;
+use Illuminate\Http\Exceptions\HttpResponseException;
+use Illuminate\Validation\Validator;
 
 class BorrowLibraryItemRequest extends FormRequest
 {
     public function authorize(): bool
     {
-       return true;
+        return true;
     }
 
     public function rules(): array
@@ -41,7 +42,6 @@ class BorrowLibraryItemRequest extends FormRequest
             ],
         ];
 
-        
         // === ONLY APPLY AVAILABILITY CHECKS WHEN STATUS IS 'borrowed' ===
         if ($this->input('status') === 'borrowed') {
             $rules['library_item_id'][] = function ($attribute, $value, $fail) {
@@ -63,7 +63,7 @@ class BorrowLibraryItemRequest extends FormRequest
                 $latestBorrowing = Borrowing::where('library_item_id', $value)
                     ->latest('id')
                     ->first();
-              
+
                 if (! $latestBorrowing || $latestBorrowing->status !== 'borrowed') {
                     $fail('This item is not currently borrowed, so it cannot be returned.');
                 }
@@ -72,7 +72,7 @@ class BorrowLibraryItemRequest extends FormRequest
                 //     $fail('You can only return items that you have borrowed.');
                 // }
             };
-            
+
         }
 
         return $rules;
@@ -99,12 +99,11 @@ class BorrowLibraryItemRequest extends FormRequest
         ];
     }
 
-    protected function prepareForValidation()
+    protected function failedValidation(Validator $validator)
     {
-        if ($this->has('cnic_number')) {
-            $this->merge([
-                'cnic_number' => preg_replace('/\D/', '', $this->cnic_number),
-            ]);
-        }
+        throw new HttpResponseException(response()->json([
+            'status' => false,
+            'errors' => $validator->errors(),
+        ], 422));
     }
 }
