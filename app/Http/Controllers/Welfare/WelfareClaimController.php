@@ -5,11 +5,13 @@ namespace App\Http\Controllers\Welfare;
 use App\Helpers\FileHelper;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\WelfareRequest;
+use App\Models\FinanceTransaction;
 use App\Models\User;
 use App\Models\WelfareClaim;
 use App\Models\WelfareClaimAttachment;
 use App\Models\WelfareClaimRemark;
 use Illuminate\Http\Request;
+ use Illuminate\Support\Facades\DB;
 
 class WelfareClaimController extends Controller
 {
@@ -198,55 +200,78 @@ class WelfareClaimController extends Controller
     /**
      * Update the status of a welfare claim.
      */
+
     public function updateStatus(Request $request, $id)
     {
-        // if receiving amount means status is ready
         $request->validate([
             'status' => 'required|in:funding,ready,rejected,collected',
         ]);
-        // if($request->status == 'rejected'){
 
-        // }
+        return DB::transaction(function () use ($request, $id) {
 
-        $claim = WelfareClaim::findOrFail($id);
+            $claim = WelfareClaim::lockForUpdate()->findOrFail($id);
 
-        // Check if the claim is already closed
-        if (in_array($claim->status, ['rejected', 'collected'])) {
+            if (in_array($claim->status, ['rejected', 'collected'])) {
+                return response()->json([
+                    'message' => 'This claim has already been closed or rejected.',
+                ], 422);
+            }
+
+            $status = $request->status;
+            $updateData = ['status' => $status];
+
+            if ($status === 'funding') {
+                $updateData['funding_date'] = now()->toDateString();
+            }
+
+            if ($status === 'ready') {
+                $updateData['ready_date'] = now()->toDateString();
+            }
+
+            if ($status === 'rejected') {
+                $updateData['rejected_date'] = now()->toDateString();
+            }
+
+            if ($status === 'collected') {
+
+                $updateData['collected_date'] = now()->toDateString();
+                $amount = $claim->amount;
+
+                $lastBalance = FinanceTransaction::lockForUpdate()
+                    ->latest('id')
+                    ->value('balance_after') ?? 0;
+
+                $balanceAfter = $lastBalance - $amount;
+
+                if ($balanceAfter < 0) {
+                    return response()->json([
+                        'status' => false,
+                        'message' => 'Insufficient balance'
+                    ], 422);
+                }
+
+                FinanceTransaction::create([
+                    'transaction_type'   => 'expense',
+                    'source_type'        => 'welfare_expense',
+                    'welfare_claim_id'   => $claim->id,
+                    'title'              => 'Welfare claim collected',
+                    'amount'             => $amount,
+                    'balance_before'     => $lastBalance,
+                    'balance_after'      => $balanceAfter,
+                    'transaction_date'   => now()->toDateString(),
+                    'created_by'         => $request->user()->id,
+                ]);
+            }
+
+            $claim->update($updateData);
+
             return response()->json([
-                'message' => 'This claim has already been closed or rejected.',
-            ], 422);
-        }
-
-        $status = $request->status;
-
-        $updateData = ['status' => $status];
-
-        if ($status == 'funding') {
-            $updateData['funding_date'] = now()->toDateString();
-        } elseif ($status == 'ready') {
-            $updateData['ready_date'] = now()->toDateString();
-        } elseif ($status == 'collected') {
-            $updateData['collected_date'] = now()->toDateString();
-        } elseif ($status == 'rejected') {
-            $updateData['rejected_date'] = now()->toDateString(); // Assuming rejected also sets collected_date
-        }
-
-        $claim->update($updateData);
-
-        // Add remark if status is rejected
-        // removed updating status only
-        // if ($status == 'rejected' && $request->has('remark')) {
-        //     WelfareClaimRemark::create([
-        //         'welfare_claim_id' => $claim->id,
-        //         'remark' => $request->input('remark'),
-        //     ]);
-        // }
-
-        return response()->json([
-            'message' => 'Status updated successfully.',
-            'data' => $claim->load(['claimer', 'user', 'attachments', 'remarks']),
-        ], 200);
+                'message' => 'Status updated successfully.',
+                'data' => $claim->load(['claimer', 'user', 'attachments', 'remarks']),
+            ], 200);
+        });
     }
+
 
     public function updateAmount(Request $request, $id)
     {
