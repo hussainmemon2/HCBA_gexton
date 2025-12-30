@@ -148,6 +148,7 @@ class LoginController extends Controller
             ->whereNull('used_at')
             ->latest()
             ->first();
+
         if (!$otp || !Hash::check($request->otp, $otp->otp)) {
             return response()->json([
                 'status' => 'error',

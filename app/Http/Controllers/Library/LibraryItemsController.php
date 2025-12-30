@@ -28,6 +28,7 @@ class LibraryItemsController extends Controller
                 'latest_borrow' => $item->latest_borrow_record,
                 'title' => $item->title,
                 'files' => $item->files,
+                // 'filename'=>$item->
                 'type' => $item->type,
                 'author_name' => $item->author_name,
                 'created_at' => $item->created_at_human,
