@@ -63,18 +63,17 @@ class ComplaintController extends Controller
                     $user->committees()
                         ->wherePivot('role', 'chairman')
                         ->where('committee_id', $complaint->committee_id)
-                        ->exists(),
+                        ->exists() || $user->role == 'admin',
 
                 'can_close' => $isChairman &&
                     $user->committees()
                         ->wherePivot('role', 'chairman')
                         ->where('committee_id', $complaint->committee_id)
-                        ->exists(),
+                        ->exists() || $user->role == 'admin',
             ];
         }),
         ]);
     }
-
     public function store(Request $request)
     {
         $validator = Validator::make($request->all(), [
@@ -155,7 +154,6 @@ class ComplaintController extends Controller
             ->wherePivot('role', 'chairman')
             ->exists();
     }
-
     public function close(Request $request, $complaintId)
     {
         $user = $request->user();
@@ -212,10 +210,10 @@ class ComplaintController extends Controller
             ->where('committee_id', $complaint->committee_id)
             ->exists();
 
-        if (! $isChairmanOfCommittee) {
+        if (! $isChairmanOfCommittee && !$user->role == 'admin') {
             return response()->json([
                 'status' => false,
-                'message' => 'Only committee chairman can add remarks'
+                'message' => 'Only committee chairman and admin can add remarks'
             ], 403);
         }
         if ($complaint->status === 'closed' && $complaint->user_satisfied === true) {
@@ -227,7 +225,7 @@ class ComplaintController extends Controller
 
         $complaint->remarks()->create([
             'user_id' => $user->id,
-            'role'    => 'chairman',
+            'role'    => $user->role == 'admin' ? 'admin' : 'chairman',
             'remark'  => $request->remark,
         ]);
 
@@ -254,15 +252,15 @@ class ComplaintController extends Controller
 
         $isOwner = $complaint->created_by === $user->id;
 
-        if (! $isChairman && ! $isOwner) {
+        if (! $isChairman && ! $isOwner && $user->role != 'admin') {
             return response()->json([
                 'status' => false,
                 'message' => 'Unauthorized'
             ], 403);
         }
 
-        $canAddRemark = $isChairman;
-        $canClose     = $isChairman;
+        $canAddRemark = $isChairman || $user->role == 'admin';
+        $canClose     = $isChairman || $user->role == 'admin';
 
         $askUser = false;
         if (
@@ -280,7 +278,7 @@ class ComplaintController extends Controller
                 'flags' => [
                     'is_chairman'    => $isChairman,
                     'is_owner'       => $isOwner,
-                    'can_add_remark' => $canAddRemark,
+                    'can_add_remark' => $canAddRemark ,
                     'can_close'      => $canClose,
                     'ask_user'       => $askUser,
                 ]
