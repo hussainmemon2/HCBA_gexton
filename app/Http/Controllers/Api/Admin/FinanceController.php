@@ -65,7 +65,7 @@ class FinanceController extends Controller
             'member:id,name,cnic',
             'committee:id,name',
             'welfareClaim'
-        ])->orderBy('transaction_date')->orderBy('id');
+        ])->latest();
 
         // Filter by CNIC
         if ($request->filled('cnic')) {
