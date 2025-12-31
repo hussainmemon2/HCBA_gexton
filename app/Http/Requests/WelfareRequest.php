@@ -4,7 +4,8 @@ namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Http\Request;
-
+use Illuminate\Contracts\Validation\Validator;
+use Illuminate\Http\Exceptions\HttpResponseException;
 class WelfareRequest extends FormRequest
 {
     /**
@@ -83,5 +84,12 @@ class WelfareRequest extends FormRequest
         if (! $this->has('claimer_id')) {
             $this->merge(['claimer_id' => auth()->id()]);
         }
+    }
+    protected function failedValidation(Validator $validator)
+    {
+        throw new HttpResponseException(response()->json([
+            'status' => false,
+            'errors' => $validator->errors(),
+        ], 422));
     }
 }

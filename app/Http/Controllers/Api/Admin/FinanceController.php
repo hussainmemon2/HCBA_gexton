@@ -64,7 +64,7 @@ class FinanceController extends Controller
         $query = FinanceTransaction::query()->with([
             'member:id,name,cnic',
             'committee:id,name',
-            'welfareClaim:id,title'
+            'welfareClaim'
         ])->orderBy('transaction_date')->orderBy('id');
 
         // Filter by CNIC

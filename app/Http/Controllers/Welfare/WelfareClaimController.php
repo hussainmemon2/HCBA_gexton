@@ -205,6 +205,7 @@ class WelfareClaimController extends Controller
     {
         $request->validate([
             'status' => 'required|in:funding,ready,rejected,collected',
+            "amount" => 'required_if:status,ready|numeric|min:0',
         ]);
 
         return DB::transaction(function () use ($request, $id) {
@@ -226,6 +227,24 @@ class WelfareClaimController extends Controller
 
             if ($status === 'ready') {
                 $updateData['ready_date'] = now()->toDateString();
+                $claim->amount = $request->amount;
+                $claim->save();
+                $lastBalance = FinanceTransaction::lockForUpdate()
+                ->latest('id')
+                ->value('balance_after') ?? 0;
+
+                $balanceAfter = $lastBalance + $request->amount;
+                FinanceTransaction::create([
+                    'transaction_type'   => 'funding',
+                    'source_type'        => 'donation',
+                    'welfare_claim_id'   => $claim->id,
+                    'title'              => 'Welfare claim amount funded',
+                    'amount'             => $request->amount,
+                    'balance_before'     => $lastBalance,
+                    'balance_after'      => $balanceAfter,
+                    'transaction_date'   => now()->toDateString(),
+                    'created_by'         => $request->user()->id,
+                ]);
             }
 
             if ($status === 'rejected') {
