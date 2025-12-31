@@ -16,7 +16,7 @@ class UsersController extends Controller
 {
     public function index(Request $request)
     {
-        $query = User::where('role', 'member');
+        $query = User::whereNot('role', 'admin');
         // Search filter
         if ($request->filled('search')) {
             $search = $request->search;
@@ -325,10 +325,10 @@ class UsersController extends Controller
             ], 404);
         }
         $validate = Validator::make($request->all(), [
-            'role' => 'required|in:member,admin',
+            'role' => 'required|in:member,admin,president,vice-president,general-secretary,joint-secretary,library-secretary,treasury',
         ], [
             'role.required' => 'Role is required.',
-            'role.in' => 'Role must be either member or admin.',
+            'role.in' => 'Role must be either member or admin or president or vice-president or general-secretary or joint-secretary or library-secretary or treasury.',
         ]);
         if ($validate->fails()) {
             return response()->json([

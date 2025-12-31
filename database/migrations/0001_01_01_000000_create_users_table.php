@@ -47,7 +47,7 @@ return new class extends Migration
             $table->string('phone', 20)->unique();
             // Authentication
             $table->string('password', 255);
-            $table->enum('role', ['admin', 'member'])->default('member'); 
+            $table->enum('role', ['admin', 'member' ,'president','vice-president' ,'general-secretary' , 'joint-secretary' , 'library-secretary' , 'treasury' ])->default('member'); 
             // Verification
             $table->boolean('is_verified_nadra')->default(false);
             $table->boolean('is_verified_hcb')->default(false);
