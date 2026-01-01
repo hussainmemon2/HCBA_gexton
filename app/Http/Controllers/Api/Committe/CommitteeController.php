@@ -29,7 +29,7 @@ class CommitteeController extends Controller
             'name'         => 'required|string|max:255',
             'description'  => 'nullable|string',
             'users'        => 'nullable|array|min:1',
-            'users.*'      => 'integer|exists:users,id',
+            'users.*'      => 'nullable|exists:users,id',
             'chairman_id'  => 'required|integer|exists:users,id',
         ]);
 

@@ -20,7 +20,7 @@ Route::middleware('api.auth')->group(function () {
         Route::get('edit/{id}', 'edit')->name('edit');
         Route::post('store', 'store')->name('store');
         Route::post('update', 'update')->name('update');
-        Route::get('delete/{id}', 'delete/{id}')->name('delete');
+        Route::get('delete/{id}', 'destroy')->name('delete');
     });
     Route::controller(BorrowingLibraryItemController::class)->prefix('borrow')->group(function () {
         Route::get('list/{bookID}', 'fetchBorrowHistory')->name('fetchBorrowHistory');

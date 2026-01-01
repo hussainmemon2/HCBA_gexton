@@ -141,14 +141,13 @@ class LoginController extends Controller
             ], 422);
         }
 
-        $user = User::where('email', $request->email)->first();
-
+        $user = User::with('committees')->where('email', $request->email)->first();
         $otp = Otp::where('user_id', $user->id)
             ->where('type', 'login')
             ->whereNull('used_at')
             ->latest()
             ->first();
-
+      
         if (!$otp || !Hash::check($request->otp, $otp->otp)) {
             return response()->json([
                 'status' => 'error',
@@ -164,6 +163,12 @@ class LoginController extends Controller
         }
 
         $otp->update(['used_at' => now()]);
+        $chairmanCommittees = $user->committees
+        ->filter(fn ($committee) => $committee->pivot->role === 'chairman')
+        ->pluck('name')
+        ->values();
+
+        $isChairman = $chairmanCommittees->isNotEmpty();
 
         $token = $user->createToken('login_token')->plainTextToken;
 
@@ -171,7 +176,9 @@ class LoginController extends Controller
             'status' => 'success',
             'message' => 'Login successful.',
             'token' => $token,
-            'user' => $user
+            'user' => $user,
+            'is_chairman' => $isChairman,
+            'committe_name' => $chairmanCommittees
         ], 200);
     }
 
