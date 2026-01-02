@@ -54,6 +54,7 @@ return new class extends Migration
             $table->enum('status', ['inactive', 'active', 'suspended'])->default('inactive');
             // Membership
             $table->boolean('dues_paid')->default(false);
+            $table->boolean('annual_fee_paid')->default(false);
             $table->boolean('email_verified')->default(false);
             // Email verification
             $table->timestamp('email_verified_at')->nullable();

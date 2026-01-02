@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Api\Admin\FeesController;
 use App\Http\Controllers\Api\Admin\FinanceController;
 use App\Http\Controllers\Api\Admin\UsersController;
 use Illuminate\Support\Facades\Route;
@@ -18,5 +19,9 @@ Route::middleware(['api.auth', 'apiRole:admin,president,vice-president,general-s
     Route::controller(FinanceController::class)->prefix('finance')->group(function () {
         Route::get('/' , 'ledger');
         Route::post('/create' , 'store');
+    });
+    Route::controller(FeesController::class)->prefix('fees-settings')->group(function () {
+        Route::get('/annual-fee' , 'getAnnualFee');
+        Route::post('/annual-fee' , 'updateAnnualFee');
     });
 });
