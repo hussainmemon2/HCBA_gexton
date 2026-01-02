@@ -133,54 +133,68 @@ class LoginController extends Controller
             'email' => 'required|email|exists:users,email',
             'otp'   => 'required|digits:6',
         ]);
-
         if ($validator->fails()) {
             return response()->json([
                 'status' => 'error',
                 'errors' => $validator->errors()
             ], 422);
         }
-
         $user = User::with('committees')->where('email', $request->email)->first();
         $otp = Otp::where('user_id', $user->id)
             ->where('type', 'login')
             ->whereNull('used_at')
             ->latest()
             ->first();
-      
         if (!$otp || !Hash::check($request->otp, $otp->otp)) {
             return response()->json([
                 'status' => 'error',
                 'message' => 'Invalid OTP.'
             ], 400);
         }
-
         if (now()->greaterThan($otp->expires_at)) {
             return response()->json([
                 'status' => 'error',
                 'message' => 'OTP has expired.'
             ], 400);
         }
-
         $otp->update(['used_at' => now()]);
         $chairmanCommittees = $user->committees
         ->filter(fn ($committee) => $committee->pivot->role === 'chairman')
-        ->pluck('name')
+        ->pluck( 'id' , 'name')
         ->values();
-
         $isChairman = $chairmanCommittees->isNotEmpty();
-
+          $committeeInfo = [
+            'committee_id'   => null,
+            'committee_role' => null,
+            'committee_name' => null,
+        ];
+        if ($user->committees->isNotEmpty()) {
+            $firstCommittee = $user->committees->first();
+            $committeeInfo = [
+                'committee_id'   => $firstCommittee->id,
+                'committee_role' => $firstCommittee->pivot->role,
+                'committee_name' => $firstCommittee->name,
+            ];
+        }
+        if ($isChairman) {
+            $firstChairmanCommittee = $chairmanCommittees->first();
+            $committeeInfo = [
+                'committee_id'   => $firstChairmanCommittee->id,
+                'committee_role' => 'chairman',
+                'committee_name' => $firstChairmanCommittee->name,
+            ];
+        }
+        $userArray = $user->toArray();
+        $userArray['is_chairman']     = $isChairman;
+        $userArray['committee_id']    = $committeeInfo['committee_id'];
+        $userArray['committee_role']  = $committeeInfo['committee_role'];
+        $userArray['committee_name']  = $committeeInfo['committee_name'];
         $token = $user->createToken('login_token')->plainTextToken;
-
         return response()->json([
-            'status' => 'success',
+            'status'  => 'success',
             'message' => 'Login successful.',
-            'token' => $token,
-            'user' => $user,
-            'is_chairman' => $isChairman,
-            'committe_name' => $chairmanCommittees
+            'token'   => $token,
+            'user'    => $userArray,
         ], 200);
     }
-
-
 }

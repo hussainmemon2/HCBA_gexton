@@ -5,7 +5,7 @@ use App\Http\Controllers\Api\Admin\UsersController;
 use Illuminate\Support\Facades\Route;
 
 
-Route::middleware(['api.auth' , 'apiRole:admin'])->prefix('admin')->group(function () {
+Route::middleware(['api.auth', 'apiRole:admin,president,vice-president,general-secretary,joint-secretary,lib`rary-secretary'])->prefix('admin')->group(function () {
     Route::controller(UsersController::class)->prefix('users')->group(function () {
         Route::get('/' , 'index');
         Route::post('/create' , 'store');

@@ -38,7 +38,7 @@ class AnnouncementRequest extends FormRequest
 
             'committee_id' => $isUpdate
                 ? 'nullable|required_if:type,committee|exists:committees,id'
-                : 'required_if:type,committee|exists:committees,id',
+                : 'nullable|required_if:type,committee|exists:committees,id',
         ];
     }
 }
