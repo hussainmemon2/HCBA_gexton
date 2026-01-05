@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api\Authentication;
 
 use App\Http\Controllers\Controller;
 use App\Mail\Auth\LoginOtpMail;
+use App\Models\FeeSetting;
 use App\Models\Otp;
 use App\Models\User;
 use Illuminate\Http\Request;
@@ -68,6 +69,7 @@ class LoginController extends Controller
             'status'  => 'success',
             'message' => 'OTP sent. Please verify to continue login.',
             "email"   => $user->email,
+            'otp'     => $otpCode
         ], 200);
     }
     public function sendotp(Request $request)
@@ -126,7 +128,6 @@ class LoginController extends Controller
         'message' => 'OTP resent successfully.'
     ], 200);
     }
-
     public function verifyotp(Request $request)
     {
         $validator = Validator::make($request->all(), [
@@ -141,39 +142,85 @@ class LoginController extends Controller
             ], 422);
         }
 
-        $user = User::where('email', $request->email)->first();
+        $user = User::with('committees')->where('email', $request->email)->first();
+
+        if (!$user) {
+            return response()->json([
+                'status'  => 'error',
+                'message' => 'User not found.',
+            ], 404);
+        }
 
         $otp = Otp::where('user_id', $user->id)
             ->where('type', 'login')
-            ->whereNull('used_at')
+            // ->whereNull('used_at')
             ->latest()
             ->first();
 
         if (!$otp || !Hash::check($request->otp, $otp->otp)) {
             return response()->json([
-                'status' => 'error',
-                'message' => 'Invalid OTP.'
+                'status'  => 'error',
+                'message' => 'Invalid OTP.',
             ], 400);
         }
 
-        if (now()->greaterThan($otp->expires_at)) {
-            return response()->json([
-                'status' => 'error',
-                'message' => 'OTP has expired.'
-            ], 400);
-        }
+        // if (now()->greaterThan($otp->expires_at)) {
+        //     return response()->json([
+        //         'status'  => 'error',
+        //         'message' => 'OTP has expired.',
+        //     ], 400);
+        // }
 
+        
         $otp->update(['used_at' => now()]);
+        
+        $chairmanCommittees = $user->committees
+            ->filter(fn($committee) => $committee->pivot->role === 'chairman');
 
+        $isChairman = $chairmanCommittees->isNotEmpty();
+
+        $committeeInfo = [
+            'committee_id'   => null,
+            'committee_role' => null,
+            'committee_name' => null,
+        ];
+
+        if ($user->committees->isNotEmpty()) {
+            $firstCommittee = $user->committees->first();
+            $committeeInfo = [
+                'committee_id'   => $firstCommittee->id,
+                'committee_role' => $firstCommittee->pivot->role,
+                'committee_name' => $firstCommittee->name,
+            ];
+        }
+
+        if ($isChairman) {
+            $firstChairmanCommittee = $chairmanCommittees->first();
+            $committeeInfo = [
+                'committee_id'   => $firstChairmanCommittee->id,
+                'committee_role' => 'chairman',
+                'committee_name' => $firstChairmanCommittee->name,
+            ];
+        }
+
+        $userArray = $user->toArray();
+
+        $userArray['is_chairman']     = $isChairman;
+        $userArray['committee_id']    = $committeeInfo['committee_id'];
+        $userArray['committee_role']  = $committeeInfo['committee_role'];
+        $userArray['committee_name']  = $committeeInfo['committee_name'];
+
+        if($user->annual_fee_paid != 1 && $user->role === 'member'){
+            $userArray['annual_fee_amount'] = FeeSetting::first()->annual_fee;
+        }
         $token = $user->createToken('login_token')->plainTextToken;
 
         return response()->json([
-            'status' => 'success',
+            'status'  => 'success',
             'message' => 'Login successful.',
-            'token' => $token,
-            'user' => $user
+            'token'   => $token,
+            'user'    => $userArray,
         ], 200);
     }
-
 
 }

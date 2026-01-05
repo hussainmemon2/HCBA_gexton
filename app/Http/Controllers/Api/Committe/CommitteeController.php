@@ -29,7 +29,7 @@ class CommitteeController extends Controller
             'name'         => 'required|string|max:255',
             'description'  => 'nullable|string',
             'users'        => 'nullable|array|min:1',
-            'users.*'      => 'integer|exists:users,id',
+            'users.*'      => 'nullable|exists:users,id',
             'chairman_id'  => 'required|integer|exists:users,id',
         ]);
 
@@ -55,15 +55,15 @@ class CommitteeController extends Controller
                     'description' => $request->description,
                 ]);
 
-                $existingUsers = CommitteeMember::whereIn('user_id', $request->users)
-                    ->pluck('user_id')
-                    ->toArray();
+                // $existingUsers = CommitteeMember::whereIn('user_id', $request->users)
+                //     ->pluck('user_id')
+                //     ->toArray();
 
-                if (!empty($existingUsers)) {
-                    throw new \Exception(
-                        'Users already assigned to a committee: ' . implode(', ', $existingUsers)
-                    );
-                }
+                // if (!empty($existingUsers)) {
+                //     throw new \Exception(
+                //         'Users already assigned to a committee: ' . implode(', ', $existingUsers)
+                //     );
+                // }
 
                 $members = [];
                 foreach ($request->users as $userId) {
@@ -91,10 +91,7 @@ class CommitteeController extends Controller
     }
     public function availableUsers()
     {
-        $users = User::whereNotIn('id', function ($query) {
-                $query->select('user_id')
-                    ->from('committee_members');
-            })->where('role', 'member')
+        $users = User::whereNot('role', 'member')->whereNot('role', 'admin')
             ->select('id', 'name', 'email' , 'cnic')
             ->get();
 
@@ -155,11 +152,11 @@ class CommitteeController extends Controller
                     ->pluck('user_id')
                     ->toArray();
 
-                if (!empty($alreadyAssigned)) {
-                    throw new \Exception(
-                        'Users already assigned to another committee: ' . implode(', ', $alreadyAssigned)
-                    );
-                }
+                // if (!empty($alreadyAssigned)) {
+                //     throw new \Exception(
+                //         'Users already assigned to another committee: ' . implode(', ', $alreadyAssigned)
+                //     );
+                // }
             }
 
             $insertData = [];

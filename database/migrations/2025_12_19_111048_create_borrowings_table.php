@@ -20,8 +20,6 @@ return new class extends Migration
             $table->date('date');
             $table->enum('status', ['borrowed', 'returned','reserved'])->default('borrowed');
             $table->timestamps();
-
-
         });
 
         Schema::enableForeignKeyConstraints();
