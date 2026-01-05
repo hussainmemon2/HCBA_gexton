@@ -1,14 +1,10 @@
 <?php
 
 use App\Http\Controllers\Library\BorrowingLibraryItemController;
-<<<<<<< HEAD
-use App\Http\Controllers\Api\StickerController;
-=======
 use App\Http\Controllers\Library\LibraryItemsController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\Welfare\WelfareClaimController;
 use Illuminate\Support\Facades\Route;
->>>>>>> 46417de10db6b4aae5b863d429846f094acc0ad0
 
 Route::middleware('api.auth')->group(function () {
     Route::controller(UserController::class)->prefix('user')->group(function () {
