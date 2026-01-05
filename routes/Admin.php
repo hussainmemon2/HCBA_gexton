@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Api\Admin\FeesController;
 use App\Http\Controllers\Api\Admin\FinanceController;
+use App\Http\Controllers\Api\Admin\StickerController;
 use App\Http\Controllers\Api\Admin\UsersController;
 use Illuminate\Support\Facades\Route;
 
@@ -23,5 +24,13 @@ Route::middleware(['api.auth', 'apiRole:admin,president,vice-president,general-s
     Route::controller(FeesController::class)->prefix('fees-settings')->group(function () {
         Route::get('/annual-fee' , 'getAnnualFee');
         Route::post('/annual-fee' , 'updateAnnualFee');
+    });
+
+    Route::controller(StickerController::class)->prefix('stickers')->group(function () {
+        Route::get('/' , 'index');
+        Route::post('/create' , 'store');
+        Route::get('/view/{id}' , 'show');
+        Route::post('/update/{id}' , 'update');
+        Route::post('/delete/{id}' , 'destroy');
     });
 });
