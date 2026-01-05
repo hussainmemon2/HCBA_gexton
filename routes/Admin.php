@@ -27,7 +27,7 @@ Route::middleware(['api.auth', 'apiRole:admin,president,vice-president,general-s
     });
 
     Route::controller(StickerController::class)->prefix('stickers')->group(function () {
-        Route::get('/' , 'index');
+        Route::get('/' , 'index')->middleware('apiRole:member');
         Route::post('/create' , 'store');
         Route::get('/view/{id}' , 'show');
         Route::post('/update/{id}' , 'update');

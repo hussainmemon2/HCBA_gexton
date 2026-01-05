@@ -8,7 +8,6 @@ use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\File;
 class StickerController extends Controller
 {
-    
     public function index()
     {
         $stickers = Sticker::latest()->get();
@@ -19,7 +18,6 @@ class StickerController extends Controller
         ]);
     }
 
-   
     public function store(Request $request)
     {
         $validator = Validator::make($request->all(), [

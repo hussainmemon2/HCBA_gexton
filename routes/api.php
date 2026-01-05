@@ -9,7 +9,7 @@ use Illuminate\Validation\ValidationException;
 use App\Http\Controllers\Library\LibraryItemsController;
 use App\Http\Controllers\Welfare\WelfareClaimController;
 use App\Http\Controllers\Library\BorrowingLibraryItemController;
-
+use App\Http\Controllers\Api\StickerController;
 
 Route::middleware('api.auth')->group(function () {
     Route::controller(UserController::class)->prefix('user')->group(function () {
