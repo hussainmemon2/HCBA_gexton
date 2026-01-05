@@ -1,15 +1,14 @@
 <?php
 
-use App\Models\User;
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\UserController;
-use Illuminate\Validation\ValidationException;
-use App\Http\Controllers\Library\LibraryItemsController;
-use App\Http\Controllers\Welfare\WelfareClaimController;
 use App\Http\Controllers\Library\BorrowingLibraryItemController;
+<<<<<<< HEAD
 use App\Http\Controllers\Api\StickerController;
+=======
+use App\Http\Controllers\Library\LibraryItemsController;
+use App\Http\Controllers\UserController;
+use App\Http\Controllers\Welfare\WelfareClaimController;
+use Illuminate\Support\Facades\Route;
+>>>>>>> 46417de10db6b4aae5b863d429846f094acc0ad0
 
 Route::middleware('api.auth')->group(function () {
     Route::controller(UserController::class)->prefix('user')->group(function () {
@@ -36,9 +35,9 @@ Route::middleware('api.auth')->group(function () {
     });
 });
 
-require __DIR__ . '/Auth.php';
-require __DIR__ . '/Announcement.php';
-require __DIR__ . '/Committe.php';
-require __DIR__ . '/Complaint.php';
-require __DIR__ . '/Admin.php';
-require __DIR__ . '/Finance.php';
+require __DIR__.'/Auth.php';
+require __DIR__.'/Announcement.php';
+require __DIR__.'/Committe.php';
+require __DIR__.'/Complaint.php';
+require __DIR__.'/Admin.php';
+require __DIR__.'/Finance.php';
