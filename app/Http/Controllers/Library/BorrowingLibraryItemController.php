@@ -69,12 +69,10 @@ class BorrowingLibraryItemController extends Controller
 
         $borrow = Borrowing::create($validated);
 
-        // Optionally update library item status to checked_out
-        // LibraryItem::where('id', $borrow->library_item_id)
-        //     ->update(['status' => 'borrowed']);
+        $message = $validated['status'] === 'reserved' ? 'Item has been successfully reserved.' : 'Item has been successfully borrowed.';
 
         return response()->json([
-            'message' => 'Item has been successfully borrowed.',
+            'message' => $message,
             'data' => $borrow->load(['libraryItem']),
         ], 201);
     }

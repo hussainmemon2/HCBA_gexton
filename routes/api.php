@@ -1,15 +1,10 @@
 <?php
 
-use App\Models\User;
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\UserController;
-use Illuminate\Validation\ValidationException;
-use App\Http\Controllers\Library\LibraryItemsController;
-use App\Http\Controllers\Welfare\WelfareClaimController;
 use App\Http\Controllers\Library\BorrowingLibraryItemController;
-
+use App\Http\Controllers\Library\LibraryItemsController;
+use App\Http\Controllers\UserController;
+use App\Http\Controllers\Welfare\WelfareClaimController;
+use Illuminate\Support\Facades\Route;
 
 Route::middleware('api.auth')->group(function () {
     Route::controller(UserController::class)->prefix('user')->group(function () {
@@ -20,7 +15,7 @@ Route::middleware('api.auth')->group(function () {
         Route::get('edit/{id}', 'edit')->name('edit');
         Route::post('store', 'store')->name('store');
         Route::post('update', 'update')->name('update');
-        Route::get('delete/{id}', 'delete/{id}')->name('delete');
+        Route::get('delete/{id}', 'destroy')->name('delete');
     });
     Route::controller(BorrowingLibraryItemController::class)->prefix('borrow')->group(function () {
         Route::get('list/{bookID}', 'fetchBorrowHistory')->name('fetchBorrowHistory');
@@ -36,9 +31,9 @@ Route::middleware('api.auth')->group(function () {
     });
 });
 
-require __DIR__ . '/Auth.php';
-require __DIR__ . '/Announcement.php';
-require __DIR__ . '/Committe.php';
-require __DIR__ . '/Complaint.php';
-require __DIR__ . '/Admin.php';
-require __DIR__ . '/Finance.php';
+require __DIR__.'/Auth.php';
+require __DIR__.'/Announcement.php';
+require __DIR__.'/Committe.php';
+require __DIR__.'/Complaint.php';
+require __DIR__.'/Admin.php';
+require __DIR__.'/Finance.php';

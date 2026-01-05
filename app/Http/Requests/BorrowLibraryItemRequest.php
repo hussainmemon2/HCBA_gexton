@@ -19,7 +19,7 @@ class BorrowLibraryItemRequest extends FormRequest
         $rules = [
             'user_id' => [
                 'nullable',
-                'required_if:status,borrowed',
+                'required_if:status,borrowed,reserved',
                 'integer',
                 'exists:users,id',
             ],
@@ -53,6 +53,7 @@ class BorrowLibraryItemRequest extends FormRequest
                 if ($latestBorrowing && $latestBorrowing->status === 'borrowed') {
                     $fail('You have already borrowed this item and have not returned it.');
                 }
+                
             };
         }
 
@@ -67,10 +68,18 @@ class BorrowLibraryItemRequest extends FormRequest
                 if (! $latestBorrowing || $latestBorrowing->status !== 'borrowed') {
                     $fail('This item is not currently borrowed, so it cannot be returned.');
                 }
-                // Optional: ensure it's the same user returning it
-                // if ($latestBorrowing->user_id !== intval($this->user_id)) {
-                //     $fail('You can only return items that you have borrowed.');
-                // }
+            };
+
+        }
+        if ($this->input('status') === 'reserved') {
+            $rules['library_item_id'][] = function ($attribute, $value, $fail) {
+                $latestBorrowing = Borrowing::where('library_item_id', $value)
+                    ->latest('id')
+                    ->first();
+
+                if (! $latestBorrowing || $latestBorrowing->status == 'borrowed') {
+                    $fail('This item is currently borrowed,so it cannot be reserved.');
+                }
             };
 
         }

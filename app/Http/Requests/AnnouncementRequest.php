@@ -24,21 +24,13 @@ class AnnouncementRequest extends FormRequest
         $isUpdate = $this->route('id') !== null;
 
         return [
-            'title' => $isUpdate
-                ? 'sometimes|string|max:200'
-                : 'required|string|max:200',
+            'title' => 'required|string|max:200',
 
-            'type' => $isUpdate
-                ? 'sometimes|in:general,welfare,committee'
-                : 'required|in:general,welfare,committee',
+            'type' => 'required|in:general,welfare,committee',
 
-            'content' => $isUpdate
-                ? 'sometimes|string'
-                : 'required|string',
+            'content' => 'required|string',
 
-            'committee_id' => $isUpdate
-                ? 'nullable|required_if:type,committee|exists:committees,id'
-                : 'required_if:type,committee|exists:committees,id',
+            'committee_id' => 'required_if:type,committee|exists:committees,id',
         ];
     }
 }
