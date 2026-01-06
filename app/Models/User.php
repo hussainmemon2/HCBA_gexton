@@ -14,7 +14,8 @@ Use App\Models\FinanceTransaction;
 use Laravel\Sanctum\HasApiTokens;
 use App\Models\WelfareClaim;
 use App\Models\Borrowing;
-
+use App\Models\NfcCard;
+use App\Models\NfcCardRequest;
 class User extends Authenticatable
 {
     /** @use HasFactory<\Database\Factories\UserFactory> */
@@ -120,6 +121,21 @@ class User extends Authenticatable
     public function borrowings()
     {
         return $this->hasMany(Borrowing::class);
+    }
+    public function nfcCards()
+    {
+      return $this->hasMany(NfcCard::class);
+    }
+
+    public function activeNfcCard()
+    {
+        return $this->hasOne(NfcCard::class)
+                    ->where('status', 'active');
+    }
+
+    public function nfcCardRequests()
+    {
+        return $this->hasMany(NfcCardRequest::class);
     }
 
 }

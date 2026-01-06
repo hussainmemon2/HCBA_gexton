@@ -6,6 +6,7 @@ use App\Http\Controllers\UserController;
 use App\Http\Controllers\Welfare\WelfareClaimController;
 use Illuminate\Support\Facades\Route;
 
+
 Route::middleware('api.auth')->group(function () {
     Route::controller(UserController::class)->prefix('user')->group(function () {
         Route::post('fetchUserViaCnic', 'fetchUserViaCnic')->name('fetchUserViaCnic');
@@ -37,3 +38,4 @@ require __DIR__.'/Committe.php';
 require __DIR__.'/Complaint.php';
 require __DIR__.'/Admin.php';
 require __DIR__.'/Finance.php';
+require __DIR__.'/NfcCard.php';

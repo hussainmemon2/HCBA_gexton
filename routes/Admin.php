@@ -2,6 +2,8 @@
 
 use App\Http\Controllers\Api\Admin\FeesController;
 use App\Http\Controllers\Api\Admin\FinanceController;
+use App\Http\Controllers\Api\Admin\NfcCardController;
+use App\Http\Controllers\Api\Admin\NfcCardRequestController;
 use App\Http\Controllers\Api\Admin\StickerController;
 use App\Http\Controllers\Api\Admin\UsersController;
 use Illuminate\Support\Facades\Route;
@@ -33,4 +35,21 @@ Route::middleware(['api.auth', 'apiRole:admin,president,vice-president,general-s
         Route::post('/update/{id}' , 'update');
         Route::post('/delete/{id}' , 'destroy');
     });
+        Route::controller(NfcCardController::class)
+        ->prefix('nfc')
+        ->group(function () {
+
+            Route::get('/cards', 'index');
+            Route::get('/cards/user/{id}', 'cardsByUser');
+            Route::post('/assign', 'assign');
+        });
+
+        Route::controller(NfcCardRequestController::class)
+        ->prefix('nfc-requests')
+        ->group(function () {
+
+            Route::get('/', 'index');
+            Route::post('/{request}/approve', 'approve');
+            Route::post('/{request}/reject', 'reject');
+        });
 });

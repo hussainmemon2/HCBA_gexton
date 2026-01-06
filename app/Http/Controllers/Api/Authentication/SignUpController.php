@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api\Authentication;
 
 use App\Http\Controllers\Controller;
 use App\Mail\Auth\VerifyEmail;
+use App\Models\NfcCard;
 use App\Models\Otp;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
@@ -160,10 +161,20 @@ class SignUpController extends Controller
             'status' => 'active'
         ]);
 
+        do {
+        $cardUid = 'NFC-' . strtoupper(Str::random(10));
+        } while (NfcCard::where('card_uid', $cardUid)->exists());
+        NfcCard::create([
+        'user_id' => $user->id,
+        'card_uid' => $cardUid,
+        'status' => 'active',
+        'issued_at' => now(),
+        ]);
+
         return response()->json([
-            'status' => 'success',
-            'message' => 'User registered successfully. Please verify email.',
-            'user' => $user
+        'status' => 'success',
+        'message' => 'User registered successfully. NFC card assigned. Please verify email.',
+        'user' => $user
         ], 201);
     }
     public function sendOtp(Request $request)
