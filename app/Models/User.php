@@ -137,5 +137,24 @@ class User extends Authenticatable
     {
         return $this->hasMany(NfcCardRequest::class);
     }
+    public function electionApplications()
+    {
+        return $this->hasMany(ElectionApplication::class);
+    }
+
+    public function electionCandidates()
+    {
+        return $this->hasMany(ElectionCandidate::class);
+    }
+
+    public function electionVotes()
+    {
+        return $this->hasMany(ElectionVote::class, 'voter_id');
+    }
+
+    public function electionPayments()
+    {
+        return $this->hasMany(ElectionPayment::class);
+}
 
 }

@@ -39,3 +39,4 @@ require __DIR__.'/Complaint.php';
 require __DIR__.'/Admin.php';
 require __DIR__.'/Finance.php';
 require __DIR__.'/NfcCard.php';
+require __DIR__.'/Election.php';

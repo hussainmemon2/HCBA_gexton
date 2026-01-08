@@ -11,10 +11,11 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('fee_settings', function (Blueprint $table) {
+        Schema::create('election_positions', function (Blueprint $table) {
             $table->id();
-            $table->integer('annual_fee')->default(0);
-            $table->integer('nfcard_fee')->default(0);
+            $table->foreignId('election_id')->constrained()->onDelete('cascade');
+            $table->string('title'); // President, Vice President, Secretary
+            $table->integer('max_candidates')->default(1);
             $table->timestamps();
         });
     }
@@ -23,6 +24,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('fee_settings');
+        Schema::dropIfExists('election_positions');
     }
 };
