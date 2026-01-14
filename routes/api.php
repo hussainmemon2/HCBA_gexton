@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Api\Users\ProfileController;
 use App\Http\Controllers\Library\BorrowingLibraryItemController;
 use App\Http\Controllers\Library\LibraryItemsController;
 use App\Http\Controllers\UserController;
@@ -29,6 +30,14 @@ Route::middleware('api.auth')->group(function () {
         Route::post('add-remark/{id}', 'addRemark')->name('addRemark');
         Route::post('update-status/{id}', 'updateStatus')->name('updateStatus');
         Route::post('amount/{id}', 'updateAmount')->name('updateAmount');
+    });
+});
+
+Route::middleware('api.auth')->group(function () {
+    Route::controller(ProfileController::class)->prefix('profile')->group(function () {
+        Route::get('/', 'Profile')->name('profile');
+        Route::post('update', 'updateProfile')->name('updateProfile');
+        Route::post('change-password', 'changePassword')->name('changePassword');
     });
 });
 

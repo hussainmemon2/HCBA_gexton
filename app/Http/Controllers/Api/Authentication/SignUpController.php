@@ -43,9 +43,9 @@ class SignUpController extends Controller
         'password' => 'required|string|min:6',
         // Files
         'cnic_front_image' => 'required|file|mimes:jpg,jpeg,png,pdf|max:2048',
-        'idcard_of_highcourt' => 'nullable|file|mimes:jpg,jpeg,png,pdf|max:2048',
-        'license_ofhighcourt' => 'nullable|file|mimes:jpg,jpeg,png,pdf|max:2048',
-        'passport_image' => 'nullable|file|mimes:jpg,jpeg,png|max:2048',
+        'idcard_of_highcourt' => 'required|file|mimes:jpg,jpeg,png,pdf|max:2048',
+        'license_ofhighcourt' => 'required|file|mimes:jpg,jpeg,png,pdf|max:2048',
+        'passport_image' => 'required|file|mimes:jpg,jpeg,png|max:2048',
     ], [
         // Basic Info Messages
         'proposer_name.required' => 'Proposer name is required.',
