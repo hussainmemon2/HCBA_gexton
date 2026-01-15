@@ -11,7 +11,6 @@ use App\Http\Controllers\Api\Admin\StickerController;
 use App\Http\Controllers\Api\Admin\UsersController;
 use Illuminate\Support\Facades\Route;
 
-
 Route::middleware(['api.auth', 'apiRole:admin,president,vice-president,general-secretary,joint-secretary,lib`rary-secretary'])->prefix('admin')->group(function () {
     Route::controller(UsersController::class)->prefix('users')->group(function () {
         Route::get('/' , 'index');
@@ -32,7 +31,7 @@ Route::middleware(['api.auth', 'apiRole:admin,president,vice-president,general-s
     });
 
     Route::controller(StickerController::class)->prefix('stickers')->group(function () {
-        Route::get('/' , 'index')->middleware('apiRole:member');
+        Route::get('/' , 'index');
         Route::post('/create' , 'store');
         Route::get('/view/{id}' , 'show');
         Route::post('/update/{id}' , 'update');
@@ -50,7 +49,6 @@ Route::middleware(['api.auth', 'apiRole:admin,president,vice-president,general-s
         Route::controller(NfcCardRequestController::class)
         ->prefix('nfc-requests')
         ->group(function () {
-
             Route::get('/', 'index');
             Route::post('/{request}/approve', 'approve');
             Route::post('/{request}/reject', 'reject');
@@ -68,8 +66,6 @@ Route::middleware(['api.auth', 'apiRole:admin'])->prefix('admin')->group(functio
         Route::post('/{electionId}/positions', 'store');
         Route::post('/positions/{id}', 'update');
    });
-
-
 });
 Route::middleware(['api.auth', 'apiRole:admin'])->prefix('admin/elections/{election}')->group(function () {
     Route::controller(ElectionReviewController::class)->group(function () {

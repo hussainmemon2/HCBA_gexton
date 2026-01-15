@@ -28,6 +28,7 @@ class UserController extends Controller
     $user = User::where('cnic', $cnic)->first();
 
     // If user not found → return error
+    
     if (!$user) {
         return response()->json([
             'status'  => 'error',
