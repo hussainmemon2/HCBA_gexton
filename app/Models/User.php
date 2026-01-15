@@ -6,14 +6,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
-Use App\Models\Otp;
-Use App\Models\Committee;
-Use App\Models\Complaint;
-Use App\Models\ComplaintRemark;
-Use App\Models\FinanceTransaction;
 use Laravel\Sanctum\HasApiTokens;
-use App\Models\WelfareClaim;
-use App\Models\Borrowing;
 
 class User extends Authenticatable
 {
@@ -57,6 +50,7 @@ class User extends Authenticatable
         'email_verified',
         'email_verified_at',
     ];
+
     /**
      * The attributes that should be hidden for serialization.
      *
@@ -79,39 +73,46 @@ class User extends Authenticatable
             'password' => 'hashed',
         ];
     }
+
     public function otps()
     {
         return $this->hasMany(Otp::class);
     }
+
     public function committees()
     {
-    return $this->belongsToMany(Committee::class, 'committee_members')
-    ->withPivot('role')
-    ->withTimestamps();
+        return $this->belongsToMany(Committee::class, 'committee_members')
+            ->withPivot('role')
+            ->withTimestamps();
     }
+
     public function complaints()
     {
-      return $this->hasMany(Complaint::class, 'created_by');
+        return $this->hasMany(Complaint::class, 'created_by');
     }
 
     public function complaintRemarks()
     {
         return $this->hasMany(ComplaintRemark::class);
     }
+
     public function isChairman()
     {
         return $this->committees()
-        ->wherePivot('role', 'chairman')
-        ->exists();
+            ->wherePivot('role', 'chairman')
+            ->exists();
     }
+
     public function financeTransactions()
     {
-         return $this->hasMany(FinanceTransaction::class, 'member_id');
+        return $this->hasMany(FinanceTransaction::class, 'member_id');
     }
+
     public function createdTransactions()
     {
-     return $this->hasMany(FinanceTransaction::class, 'created_by');
+        return $this->hasMany(FinanceTransaction::class, 'created_by');
     }
+
     public function welfareClaims()
     {
         return $this->hasMany(WelfareClaim::class);
@@ -121,5 +122,4 @@ class User extends Authenticatable
     {
         return $this->hasMany(Borrowing::class);
     }
-
 }

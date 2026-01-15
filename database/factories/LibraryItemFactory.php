@@ -16,7 +16,6 @@ class LibraryItemFactory extends Factory
             'author_name' => fake()->name(),
             'type' => fake()->randomElement(["book","e-journal"]),
             'return_date'=>now(),
-            // 'status' => fake()->randomElement(["available","reserved"]),
             'rfid_tag' => fake()->regexify('[A-Za-z0-9]{50}'),
         ];
     }

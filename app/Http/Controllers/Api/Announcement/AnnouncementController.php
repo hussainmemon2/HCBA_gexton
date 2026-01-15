@@ -58,22 +58,27 @@ class AnnouncementController extends Controller
     public function store(AnnouncementRequest $request)
     {
         $user = $request->user();
-
         $committeeId = null;
+
         if ($request->type == 'committee') {
             $isAdmin = $user->role == 'admin';
-            $isChairman = $user->isChairman();
-            if (! $isChairman && ! $isAdmin) {
-                return response()->json([
-                    'status' => false,
-                    'message' => 'You are not eligible to make a committee announcement',
-                ], 403);
-            }
+
             if (! $isAdmin) {
-                $committeeId = $user->chairmanCommittee()->id;
-            } else {
-                $committeeId = $request->committee_id;
+
+                $isChairmanOfThisCommittee = $user->committees()
+                    ->where('committees.id', $request->committee_id)
+                    ->wherePivot('role', 'chairman')
+                    ->exists();
+
+                if (! $isChairmanOfThisCommittee) {
+                    return response()->json([
+                        'status' => false,
+                        'message' => 'You are not the chairman of the specified committee',
+                    ], 403);
+                }
             }
+            $committeeId = $request->committee_id;
+
         }
 
         DB::beginTransaction();
@@ -131,13 +136,38 @@ class AnnouncementController extends Controller
     {
         $user = $request->user();
         $announcement = Announcement::findOrFail($id);
+        $isAdmin = $user->role == 'admin';
 
         // Only poster or admin can update
-        if ($announcement->posted_by !== $user->id && $user->role !== 'admin') {
+        if ($announcement->posted_by !== $user->id && !$isAdmin) {
             return response()->json([
                 'status' => false,
                 'message' => 'Unauthorized',
             ], 403);
+        }
+
+        // Handle committee logic only if type is being updated to committee
+        if ($request->filled('type') && $request->type === 'committee') {
+            if (!$request->has('committee_id')) {
+                return response()->json([
+                    'status' => false,
+                    'message' => 'committee_id is required when updating to committee type',
+                ], 400);
+            }
+
+            if (!$isAdmin) {
+                $isChairmanOfThisCommittee = $user->committees()
+                    ->where('committees.id', $request->committee_id)
+                    ->wherePivot('role', 'chairman')
+                    ->exists();
+
+                if (!$isChairmanOfThisCommittee) {
+                    return response()->json([
+                        'status' => false,
+                        'message' => 'You are not the chairman of the specified committee',
+                    ], 403);
+                }
+            }
         }
 
         DB::beginTransaction();
@@ -217,5 +247,10 @@ class AnnouncementController extends Controller
         }
 
         return false;
+    }
+
+    public function fetchChairmanCommittees()
+    {
+        // Committees::
     }
 }

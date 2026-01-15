@@ -22,13 +22,18 @@ class LibraryItemsController extends Controller
             $query->where('title', 'like', "%{$search}%")
                 ->orWhere('type', 'like', "%{$search}%");
         }
-        $library = $query->paginate(10)->through(function ($item) {
+        $library = $query->with('files')->paginate(10)->through(function ($item) {
+            $fileUrls = $item->files->map(function ($attachment) {
+                return [
+                    'filename' => $attachment->filename,
+                    'url'      => asset('assets/libraryAttachments/' . $attachment->filename),
+                ];
+            })->toArray();
             return [
                 'id' => $item->id,
                 'latest_borrow' => $item->latest_borrow_record,
                 'title' => $item->title,
-                'files' => $item->files,
-                // 'filename'=>$item->
+                'files' => $fileUrls,
                 'type' => $item->type,
                 'author_name' => $item->author_name,
                 'created_at' => $item->created_at_human,
@@ -60,32 +65,38 @@ class LibraryItemsController extends Controller
         $item = LibraryItem::create($validated);
         if ($request->hasFile('files')) {
             $mergeFileName = collect($request->file('files') ?? [])
-                ->map(fn ($file) => FileHelper::uploadToPublic($file, 'assets/libraryAttachments'))
+                ->map(fn($file) => FileHelper::uploadToPublic($file, 'assets/libraryAttachments'))
                 ->filter()
                 ->values()
                 ->toArray();
             foreach ($mergeFileName as $filename) {
                 LibraryItemAttachment::create([
                     'library_item_id' => $item->id,
-                    'filename' => $filename]);
+                    'filename' => $filename
+                ]);
             }
         }
+
 
         return response()->json([
             'message' => 'Library item created successfully.',
             'data' => $item,
         ], 201);
-
     }
 
     /**
      * Update the specified resource in storage.
      */
-    public function update(LibraryItemRequest $request)
+    public function update(LibraryItemRequest $request, $id)
     {
-        $item = LibraryItem::findOrFail($request->input('id'));
+        $item = LibraryItem::find($id);
+        if (! $item) {
+            return response()->json([
+                'message' => 'Library item not found.',
+            ], 404);
+        }
 
-        $item->update($request->except('id')); // Exclude id from update
+        $item->update($request->validated()); // Exclude id from update
 
         return response()->json([
             'message' => 'Library item updated successfully.',

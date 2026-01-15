@@ -14,8 +14,7 @@ class LibraryItemRequest extends FormRequest
      */
     public function authorize(): bool
     {
-       return true;
-
+        return true;
     }
 
     /**
@@ -25,19 +24,13 @@ class LibraryItemRequest extends FormRequest
      */
     public function rules(): array
     {
-        // For update: id is required; for store: id should not be present
-        $isUpdate = $this->isMethod('put') || $this->isMethod('patch') || $this->filled('id');
-
         $rules = [
-            'id' => [$isUpdate ? 'required' : 'prohibited', 'integer', 'exists:library_items,id'],
-
             'title' => ['required', 'string', 'max:200'],
             'type' => ['required', 'in:book,book,e-journal'],
             'author_name' => ['required'],
-            'return_date' => ['nullable'],
             'files' => [
                 $this->input('type') === 'e-journal'
-                    ? ($isUpdate ? 'sometimes' : 'required')
+                    ?  'required'
                     : 'nullable',
 
                 'file',
@@ -57,7 +50,7 @@ class LibraryItemRequest extends FormRequest
             // For books: require at least one file on create, optional on update
             $rules['files'] = [
                 'array', // ensures it's an array
-                $isUpdate ? 'sometimes' : 'required', // required only on create
+                'required', // required only on create
             ];
 
             $rules['file.*'] = [
@@ -65,11 +58,6 @@ class LibraryItemRequest extends FormRequest
                 'mimes:pdf,doc,docx,zip', // adjust allowed types
                 'max:20480',             // max 20MB per file (adjust as needed)
             ];
-
-            // Optional: require at least 1 file on create
-            if (! $isUpdate) {
-                $rules['files'][] = 'min:1'; // at least one file
-            }
         } else {
             // For non-books (e.g., e-journal): files optional
             $rules['files'] = ['nullable', 'array'];
@@ -79,9 +67,6 @@ class LibraryItemRequest extends FormRequest
                 'mimes:pdf,doc,docx,zip',
                 'max:20480',
             ];
-
-            // Or completely prohibit files for non-books:
-            // $rules['file'] = ['prohibited'];
         }
         return $rules;
     }
@@ -89,13 +74,10 @@ class LibraryItemRequest extends FormRequest
     public function messages(): array
     {
         return [
-            'id.required' => 'The library item ID is required for updating.',
-            'id.exists' => 'The selected library item does not exist.',
-            'id.prohibited' => 'ID should not be provided when creating a new item.',
 
             'title.required' => 'The title is required.',
             'title.max' => 'The title may not exceed 200 characters.',
-            'files.required'=>'Files must be present when type is e-journal',
+            'files.required' => 'Files must be present when type is e-journal',
 
             'type.required' => 'Please select an item type.',
             'type.in' => 'The type must be Book, Journal, or E-Journal.',

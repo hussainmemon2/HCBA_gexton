@@ -21,7 +21,6 @@ class AnnouncementRequest extends FormRequest
      */
     public function rules(): array
     {
-        $isUpdate = $this->route('id') !== null;
 
         return [
             'title' => 'required|string|max:200',

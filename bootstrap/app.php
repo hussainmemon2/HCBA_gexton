@@ -20,6 +20,7 @@ return Application::configure(basePath: dirname(__DIR__))
             SubstituteBindings::class,
         ]);
      $middleware->alias([
+        'verifyReservation' => \App\Http\Middleware\VerifyLibraryReservation::class,
         'api.auth' => \App\Http\Middleware\ApiAuthMiddleware::class,
         'apiRole' => \App\Http\Middleware\ApiRoleMiddleware::class,
     ]);

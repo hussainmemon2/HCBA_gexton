@@ -17,7 +17,7 @@ return new class extends Migration
             $table->id();
             $table->foreignId('user_id')->constrained();
             $table->foreignId('library_item_id')->constrained();
-            $table->date('date');
+            $table->date('date')->nullable();
             $table->enum('status', ['borrowed', 'returned','reserved'])->default('borrowed');
             $table->timestamps();
         });

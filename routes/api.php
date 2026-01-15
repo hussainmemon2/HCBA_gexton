@@ -14,10 +14,10 @@ Route::middleware('api.auth')->group(function () {
         Route::get('index', 'index')->name('index');
         Route::get('edit/{id}', 'edit')->name('edit');
         Route::post('store', 'store')->name('store');
-        Route::post('update', 'update')->name('update');
+        Route::post('update/{id}', 'update')->name('update');
         Route::get('delete/{id}', 'destroy')->name('delete');
     });
-    Route::controller(BorrowingLibraryItemController::class)->prefix('borrow')->group(function () {
+    Route::controller(BorrowingLibraryItemController::class)->middleware('verifyReservation')->prefix('borrow')->group(function () {
         Route::get('list/{bookID}', 'fetchBorrowHistory')->name('fetchBorrowHistory');
         Route::post('store', 'store')->name('store');
     });
@@ -32,8 +32,9 @@ Route::middleware('api.auth')->group(function () {
 });
 
 require __DIR__.'/Auth.php';
-require __DIR__.'/Announcement.php';
 require __DIR__.'/Committe.php';
+require __DIR__.'/Booking.php';
+require __DIR__.'/Auditorium.php';
 require __DIR__.'/Complaint.php';
 require __DIR__.'/Admin.php';
 require __DIR__.'/Finance.php';

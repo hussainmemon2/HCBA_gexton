@@ -6,6 +6,9 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\BorrowLibraryItemRequest;
 use App\Models\Borrowing;
 use App\Models\LibraryItem;
+use App\Models\User;
+
+
 
 class BorrowingLibraryItemController extends Controller
 {
@@ -53,7 +56,7 @@ class BorrowingLibraryItemController extends Controller
         $validated = $request->validated();
 
         // Auto set user_id for returning if not provided
-        if ($validated['status'] === 'returned' && empty($validated['user_id'])) {
+        if ($validated['status'] === 'returned') {
             $latestBorrowing = Borrowing::where('library_item_id', $validated['library_item_id'])
                 ->where('status', 'borrowed')
                 ->latest('id')
@@ -62,10 +65,12 @@ class BorrowingLibraryItemController extends Controller
             if ($latestBorrowing) {
                 $validated['user_id'] = $latestBorrowing->user_id;
             }
+        } elseif ($validated['status'] === 'borrowed') {
+            $user = User::where('cnic', $validated['cnic_number'])->first();
+            $validated['user_id'] = $user->id;
+        } else if ($validated['status'] === 'reserved') {
+            $validated['user_id'] = $request->user()->id;
         }
-
-        $validated['date'] = now()->toDateString();
-        // $validated['status'] = 'borrowed';
 
         $borrow = Borrowing::create($validated);
 
@@ -80,23 +85,23 @@ class BorrowingLibraryItemController extends Controller
     /**
      * Update a borrowing record (e.g., mark as returned or extend).
      */
-    public function update(BorrowLibraryItemRequest $request)
-    {
-        $borrow = Borrowing::findOrFail($request->input('id'));
+    // public function update(BorrowLibraryItemRequest $request)
+    // {
+    //     $borrow = Borrowing::findOrFail($request->input('id'));
 
-        $borrow->update($request->except('id'));
+    //     $borrow->update($request->except('id'));
 
-        // If status changed to 'returned', update library item status back to available
-        if ($borrow->fresh()->status === 'returned') {
-            LibraryItem::where('id', $borrow->library_item_id)
-                ->update(['status' => 'available']);
-        }
+    //     // If status changed to 'returned', update library item status back to available
+    //     if ($borrow->fresh()->status === 'returned') {
+    //         LibraryItem::where('id', $borrow->library_item_id)
+    //             ->update(['status' => 'available']);
+    //     }
 
-        return response()->json([
-            'message' => 'Borrowing record updated successfully.',
-            'data' => $borrow->refresh()->load(['libraryItem']),
-        ], 200);
-    }
+    //     return response()->json([
+    //         'message' => 'Borrowing record updated successfully.',
+    //         'data' => $borrow->refresh()->load(['libraryItem']),
+    //     ], 200);
+    // }
 
     /**
      * Delete/cancel a borrowing record (admin only).

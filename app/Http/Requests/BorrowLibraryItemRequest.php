@@ -5,7 +5,8 @@ namespace App\Http\Requests;
 use App\Models\Borrowing;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Http\Exceptions\HttpResponseException;
-use Illuminate\Validation\Validator;
+
+use Illuminate\Contracts\Validation\Validator;
 
 class BorrowLibraryItemRequest extends FormRequest
 {
@@ -17,22 +18,23 @@ class BorrowLibraryItemRequest extends FormRequest
     public function rules(): array
     {
         $rules = [
-            'user_id' => [
+            'cnic_number' => [
                 'nullable',
-                'required_if:status,borrowed,reserved',
-                'integer',
-                'exists:users,id',
+                'required_if:status,borrowed',
+                'exists:users,cnic',
             ],
 
             'date' => [
                 'nullable',
                 'date',
+                'required_if:status,borrowed',
                 'after_or_equal:today',
             ],
 
+
             'status' => [
                 'required',
-                'in:borrowed,returned',
+                'in:borrowed,returned,reserved',
             ],
 
             'library_item_id' => [
@@ -53,7 +55,9 @@ class BorrowLibraryItemRequest extends FormRequest
                 if ($latestBorrowing && $latestBorrowing->status === 'borrowed') {
                     $fail('You have already borrowed this item and have not returned it.');
                 }
-                
+                if ($latestBorrowing && $latestBorrowing->status === 'reserved') {
+                    $fail('This item is already reserved you cannot borrow it.');
+                }
             };
         }
 
@@ -69,19 +73,24 @@ class BorrowLibraryItemRequest extends FormRequest
                     $fail('This item is not currently borrowed, so it cannot be returned.');
                 }
             };
-
         }
         if ($this->input('status') === 'reserved') {
             $rules['library_item_id'][] = function ($attribute, $value, $fail) {
                 $latestBorrowing = Borrowing::where('library_item_id', $value)
                     ->latest('id')
                     ->first();
+                $alreadyReservedBySameUser = Borrowing::where('library_item_id', $value)
+                    ->latest('id')
+                    ->where('status', 'reserved')
+                    ->first();
+                if ($alreadyReservedBySameUser) {
+                    $fail('This item is already borrowed by someonelse');
+                }
 
                 if (! $latestBorrowing || $latestBorrowing->status == 'borrowed') {
                     $fail('This item is currently borrowed,so it cannot be reserved.');
                 }
             };
-
         }
 
         return $rules;
@@ -97,8 +106,8 @@ class BorrowLibraryItemRequest extends FormRequest
             'user_id.exists' => 'The selected user does not exist.',
 
             'cnic_number.required' => 'CNIC number is required.',
-            'cnic_number.digits' => 'CNIC must be exactly 13 digits.',
-            'cnic_number.regex' => 'CNIC must contain only digits.',
+            // 'cnic_number.digits' => 'CNIC must be exactly 13 digits.',
+            // 'cnic_number.regex' => 'CNIC must contain only digits.',
             'cnic_number.exists' => 'The provided CNIC does not match the user\'s registered CNIC.',
 
             'date.required' => 'Expected return date is required.',
