@@ -3,6 +3,11 @@
 namespace App\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
+use App\Models\Borrowing;
+use App\Models\ElectionVote;
+use App\Models\NfcCard;
+use App\Models\NfcCardRequest;
+use App\Models\WelfareClaim;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
@@ -122,4 +127,39 @@ class User extends Authenticatable
     {
         return $this->hasMany(Borrowing::class);
     }
+    public function nfcCards()
+    {
+      return $this->hasMany(NfcCard::class);
+    }
+
+    public function activeNfcCard()
+    {
+        return $this->hasOne(NfcCard::class)
+                    ->where('status', 'active');
+    }
+
+    public function nfcCardRequests()
+    {
+        return $this->hasMany(NfcCardRequest::class);
+    }
+    public function electionApplications()
+    {
+        return $this->hasMany(ElectionApplication::class);
+    }
+
+    public function electionCandidates()
+    {
+        return $this->hasMany(ElectionCandidate::class);
+    }
+
+    public function electionVotes()
+    {
+        return $this->hasMany(ElectionVote::class, 'voter_id');
+    }
+
+    public function electionPayments()
+    {
+        return $this->hasMany(ElectionPayment::class);
+}
+
 }

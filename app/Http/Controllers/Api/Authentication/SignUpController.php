@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api\Authentication;
 
 use App\Http\Controllers\Controller;
 use App\Mail\Auth\VerifyEmail;
+use App\Models\NfcCard;
 use App\Models\Otp;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
@@ -42,9 +43,9 @@ class SignUpController extends Controller
         'password' => 'required|string|min:6',
         // Files
         'cnic_front_image' => 'required|file|mimes:jpg,jpeg,png,pdf|max:2048',
-        'idcard_of_highcourt' => 'nullable|file|mimes:jpg,jpeg,png,pdf|max:2048',
-        'license_ofhighcourt' => 'nullable|file|mimes:jpg,jpeg,png,pdf|max:2048',
-        'passport_image' => 'nullable|file|mimes:jpg,jpeg,png|max:2048',
+        'idcard_of_highcourt' => 'required|file|mimes:jpg,jpeg,png,pdf|max:2048',
+        'license_ofhighcourt' => 'required|file|mimes:jpg,jpeg,png,pdf|max:2048',
+        'passport_image' => 'required|file|mimes:jpg,jpeg,png|max:2048',
     ], [
         // Basic Info Messages
         'proposer_name.required' => 'Proposer name is required.',
@@ -160,10 +161,20 @@ class SignUpController extends Controller
             'status' => 'active'
         ]);
 
+        do {
+        $cardUid = 'NFC-' . strtoupper(Str::random(10));
+        } while (NfcCard::where('card_uid', $cardUid)->exists());
+        NfcCard::create([
+        'user_id' => $user->id,
+        'card_uid' => $cardUid,
+        'status' => 'active',
+        'issued_at' => now(),
+        ]);
+
         return response()->json([
-            'status' => 'success',
-            'message' => 'User registered successfully. Please verify email.',
-            'user' => $user
+        'status' => 'success',
+        'message' => 'User registered successfully. NFC card assigned. Please verify email.',
+        'user' => $user
         ], 201);
     }
     public function sendOtp(Request $request)

@@ -153,7 +153,6 @@ class LoginController extends Controller
 
         $otp = Otp::where('user_id', $user->id)
             ->where('type', 'login')
-            // ->whereNull('used_at')
             ->latest()
             ->first();
 
@@ -164,55 +163,36 @@ class LoginController extends Controller
             ], 400);
         }
 
-        // if (now()->greaterThan($otp->expires_at)) {
-        //     return response()->json([
-        //         'status'  => 'error',
-        //         'message' => 'OTP has expired.',
-        //     ], 400);
-        // }
+        if (now()->greaterThan($otp->expires_at)) {
+            return response()->json([
+                'status'  => 'error',
+                'message' => 'OTP has expired.',
+            ], 400);
+        }
 
-        
+        // Mark OTP as used
         $otp->update(['used_at' => now()]);
-        
-        $chairmanCommittees = $user->committees
-            ->filter(fn($committee) => $committee->pivot->role === 'chairman');
 
-        $isChairman = $chairmanCommittees->isNotEmpty();
-
-        $committeeInfo = [
-            'committee_id'   => null,
-            'committee_role' => null,
-            'committee_name' => null,
-        ];
-
-        if ($user->committees->isNotEmpty()) {
-            $firstCommittee = $user->committees->first();
-            $committeeInfo = [
-                'committee_id'   => $firstCommittee->id,
-                'committee_role' => $firstCommittee->pivot->role,
-                'committee_name' => $firstCommittee->name,
+        // Prepare committees data
+        $committees = $user->committees->map(function ($committee) {
+            return [
+                'committee_id'   => $committee->id,
+                'committee_name' => $committee->name,
+                'committee_role' => $committee->pivot->role,
+                'is_chairman'    => $committee->pivot->role === 'chairman',
             ];
-        }
+        });
 
-        if ($isChairman) {
-            $firstChairmanCommittee = $chairmanCommittees->first();
-            $committeeInfo = [
-                'committee_id'   => $firstChairmanCommittee->id,
-                'committee_role' => 'chairman',
-                'committee_name' => $firstChairmanCommittee->name,
-            ];
-        }
+        $isChairman = $committees->contains('is_chairman', true);
 
         $userArray = $user->toArray();
+        $userArray['is_chairman'] = $isChairman;
+        $userArray['committees']  = $committees->values();
 
-        $userArray['is_chairman']     = $isChairman;
-        $userArray['committee_id']    = $committeeInfo['committee_id'];
-        $userArray['committee_role']  = $committeeInfo['committee_role'];
-        $userArray['committee_name']  = $committeeInfo['committee_name'];
-
-        if($user->annual_fee_paid != 1 && $user->role === 'member'){
-            $userArray['annual_fee_amount'] = FeeSetting::first()->annual_fee;
+        if ($user->annual_fee_paid != 1 && $user->role === 'member') {
+            $userArray['annual_fee_amount'] = FeeSetting::value('annual_fee');
         }
+
         $token = $user->createToken('login_token')->plainTextToken;
 
         return response()->json([
@@ -222,5 +202,4 @@ class LoginController extends Controller
             'user'    => $userArray,
         ], 200);
     }
-
 }
