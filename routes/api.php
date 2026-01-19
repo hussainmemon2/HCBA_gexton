@@ -41,12 +41,12 @@ Route::middleware('api.auth')->group(function () {
     });
 });
 
-require __DIR__.'/Auth.php';
-require __DIR__.'/Committe.php';
-require __DIR__.'/Booking.php';
-require __DIR__.'/Auditorium.php';
-require __DIR__.'/Complaint.php';
-require __DIR__.'/Admin.php';
-require __DIR__.'/Finance.php';
-require __DIR__.'/NfcCard.php';
-require __DIR__.'/Election.php';
+require __DIR__ . '/Auth.php';
+require __DIR__ . '/Committe.php';
+require __DIR__ . '/Booking.php';
+require __DIR__ . '/Auditorium.php';
+require __DIR__ . '/Complaint.php';
+require __DIR__ . '/Admin.php';
+require __DIR__ . '/Finance.php';
+require __DIR__ . '/NfcCard.php';
+require __DIR__ . '/Election.php';
