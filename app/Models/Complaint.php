@@ -7,7 +7,8 @@ use App\Models\User;
 use App\Models\Committee;
 use App\Models\ComplaintRemark;
 use App\Models\ComplaintAttachment;
-
+use App\Models\ComplaintTransfer;
+use App\models\ComplaintHistory;
 class Complaint extends Model
 {
   protected $fillable = [
@@ -47,5 +48,13 @@ class Complaint extends Model
     public function attachments()
     {
         return $this->hasMany(ComplaintAttachment::class);
+    }
+    public function transfers()
+    {
+        return $this->hasMany(ComplaintTransfer::class);
+    }
+    public function histories()
+    {
+        return $this->hasMany(ComplaintHistory::class);
     }
 }

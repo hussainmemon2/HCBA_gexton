@@ -17,6 +17,7 @@ return new class extends Migration
         $table->foreignId('uploaded_by')->constrained('users')->cascadeOnDelete();
         $table->string('filename');
         $table->string('file_path');
+        $table->enum('uploaded_at', ['opened' ,'closed' , 'rejected' , 'transfered']);
         $table->timestamps();
         });
     }
