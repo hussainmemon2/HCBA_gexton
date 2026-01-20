@@ -30,6 +30,8 @@ class AnnouncementRequest extends FormRequest
             'content' => 'required|string',
 
             'committee_id' => 'required_if:type,committee|exists:committees,id',
+
+            'attachment' => 'nullable|file|mimes:pdf,doc,docx,zip,png,jpg|max:20480'
         ];
     }
 }

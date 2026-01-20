@@ -2,10 +2,10 @@
 
 namespace App\Http\Controllers\Api\Announcement;
 
+use App\Helpers\FileHelper;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\AnnouncementRequest;
 use App\Models\Announcement;
-use App\Models\Committee;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
@@ -59,7 +59,9 @@ class AnnouncementController extends Controller
     {
         $user = $request->user();
         $committeeId = null;
-
+        if ($request->hasFile('attachment')) {
+            $filename = FileHelper::uploadToPublic($request->file('attachment'), 'assets/announcementAttachment');
+        }
         if ($request->type == 'committee') {
             $isAdmin = $user->role == 'admin';
 
@@ -78,7 +80,6 @@ class AnnouncementController extends Controller
                 }
             }
             $committeeId = $request->committee_id;
-
         }
 
         DB::beginTransaction();
@@ -91,6 +92,7 @@ class AnnouncementController extends Controller
                 'posted_by' => $user->id,
                 'posted_at' => now(),
                 'committee_id' => $committeeId,
+                'attachment' => $filename ?? null
             ]);
 
             DB::commit();
@@ -100,7 +102,6 @@ class AnnouncementController extends Controller
                 'message' => 'Announcement created successfully',
                 'data' => $announcement->load(['poster:id,name', 'committee:id,name']),
             ], 201);
-
         } catch (\Exception $e) {
             DB::rollBack();
 
@@ -176,15 +177,15 @@ class AnnouncementController extends Controller
             // Only update fields that are present
             $data = array_filter(
                 $request->only(['title', 'type', 'content']),
-                fn ($value) => ! is_null($value)
+                fn($value) => ! is_null($value)
             );
 
             // Handle committee logic only if type is being updated
             if ($request->filled('type')) {
                 $data['committee_id'] =
                     $request->type === 'committee'
-                        ? $request->committee_id
-                        : null;
+                    ? $request->committee_id
+                    : null;
             }
 
             $announcement->update($data);
@@ -196,7 +197,6 @@ class AnnouncementController extends Controller
                 'message' => 'Announcement updated successfully',
                 'data' => $announcement->load(['poster:id,name', 'committee:id,name']),
             ]);
-
         } catch (\Exception $e) {
             DB::rollBack();
 

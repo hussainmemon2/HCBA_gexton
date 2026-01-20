@@ -20,6 +20,7 @@ return new class extends Migration
         Schema::create('announcements', function (Blueprint $table) {
             $table->id();
             $table->string('title', 200);
+            $table->string('attachment')->nullable();
             $table->enum('type', ['general', 'welfare', 'committee'])->default('general');
             $table->text('content');
             $table->foreignId('posted_by')->constrained('users');

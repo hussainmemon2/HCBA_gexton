@@ -11,11 +11,11 @@ class Announcement extends Model
     protected $fillable = [
         'title',
         'type',
-        // 'role',
         'content',
         'posted_by',
         'posted_at',
         'committee_id',
+        'attachment'
     ];
 
     protected $casts = [

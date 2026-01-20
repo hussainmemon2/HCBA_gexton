@@ -29,7 +29,7 @@ Route::middleware('api.auth')->group(function () {
         Route::get('show/{id}', 'show')->name('show');
         Route::post('add-remark/{id}', 'addRemark')->name('addRemark');
         Route::post('update-status/{id}', 'updateStatus')->name('updateStatus');
-        Route::post('amount/{id}', 'updateAmount')->name('updateAmount');
+        // Route::post('amount/{id}', 'updateAmount')->name('updateAmount');
     });
 });
 

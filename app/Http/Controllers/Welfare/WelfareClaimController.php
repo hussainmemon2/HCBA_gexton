@@ -70,7 +70,6 @@ class WelfareClaimController extends Controller
     public function store(WelfareRequest $request)
     {
         $loggedInUserId = $request->user()->id;
-        // dd($loggedInUserId = $request->user()->role);
 
         // claimer_id will be nullable claimer can claim for another user
         // when claiming for another user claimer id is required when claiming for himself than not required
@@ -90,8 +89,8 @@ class WelfareClaimController extends Controller
 
         // Set received_date if status is received
         $validated['status'] = 'received';
-        // {
-        $validated['received_date'] = now()->toDateString();        // }
+
+        $validated['received_date'] = now()->toDateString();
 
         $claim = WelfareClaim::create($validated);
 
@@ -223,7 +222,6 @@ class WelfareClaimController extends Controller
             if ($status === 'funding') {
                 $updateData['funding_date'] = now()->toDateString();
             }
-
             if ($status === 'ready') {
                 $updateData['ready_date'] = now()->toDateString();
                 // $claim->amount = $request->amount;
@@ -292,17 +290,17 @@ class WelfareClaimController extends Controller
         });
     }
 
-    public function updateAmount(Request $request, $id)
-    {
-        $validated = $request->validate([
-            'amount' => 'required',
-        ]);
-        $claim = WelfareClaim::findOrFail($id);
-        $claim->update($validated);
+    // public function updateAmount(Request $request, $id)
+    // {
+    //     $validated = $request->validate([
+    //         'amount' => 'required',
+    //     ]);
+    //     $claim = WelfareClaim::findOrFail($id);
+    //     $claim->update($validated);
 
-        return response()->json([
-            'message' => 'Amount updated successfully.',
-            'data' => $claim->load(['claimer', 'user', 'attachments', 'remarks']),
-        ], 200);
-    }
+    //     return response()->json([
+    //         'message' => 'Amount updated successfully.',
+    //         'data' => $claim->load(['claimer', 'user', 'attachments', 'remarks']),
+    //     ], 200);
+    // }
 }
