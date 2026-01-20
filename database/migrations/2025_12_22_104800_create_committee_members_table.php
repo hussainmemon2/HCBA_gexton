@@ -15,7 +15,7 @@ return new class extends Migration
         $table->id();
         $table->unsignedBigInteger('committee_id');
         $table->unsignedBigInteger('user_id');
-        $table->enum('role', ['chairman', 'member'])->default('member');
+        $table->enum('role', ['chairman', 'member' ,'focal_person'])->default('member');
         $table->timestamps();
         // Foreign keys
         $table->foreign('committee_id')->references('id')->on('committees')->onDelete('cascade');

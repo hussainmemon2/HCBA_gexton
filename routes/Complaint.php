@@ -3,7 +3,7 @@
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\Complaint\ComplaintController;
 
-Route::middleware(['api.auth' , 'apiRole:member,admin'])->controller(ComplaintController::class)->prefix('complaint')->group(function (){
+Route::middleware(['api.auth' , 'apiRole:admin,member,president,vice-president,general-secretary,joint-secretary,library-secretary,treasury'])->controller(ComplaintController::class)->prefix('complaint')->group(function (){
     Route::get('/' , 'index');
     Route::post('/create' , 'store');
     Route::get('/committes' , 'committes');
@@ -11,4 +11,7 @@ Route::middleware(['api.auth' , 'apiRole:member,admin'])->controller(ComplaintCo
     Route::post('/add-remark/{id}' , 'addRemark');
     Route::post('/close/{id}' , 'close');
     Route::post('/satisfaction-feedback/{id}' , 'respondSatisfaction');
+    Route::post('/transfer/{id}' , 'transfer');
+    Route::post('/reject/{id}' , 'reject');
+    
 });
