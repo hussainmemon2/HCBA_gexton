@@ -55,7 +55,6 @@ class WelfareClaimController extends Controller
                 'ready_date' => $item->ready_date,
                 'rejected_date' => $item->rejected_date,
                 'collected_date' => $item->collected_date,
-
                 'status' => $item->status,
                 'created_at' => $item->created_at->format('Y-m-d H:i:s'),
             ];
