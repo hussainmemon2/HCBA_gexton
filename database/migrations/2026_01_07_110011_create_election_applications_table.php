@@ -14,23 +14,26 @@ return new class extends Migration
         Schema::create('election_applications', function (Blueprint $table) {
             $table->id();
             $table->foreignId('election_id')
+                ->nullable()
                 ->constrained()
                 ->cascadeOnDelete();
             $table->foreignId('position_id')
+                ->nullable()
                 ->constrained('election_positions')
                 ->cascadeOnDelete();
             $table->foreignId('user_id')
+                ->nullable()
                 ->constrained()
                 ->cascadeOnDelete();
-            $table->string('vakalatnama');
-            $table->string('case_order');
-            $table->string('fee_challan_of_bar_card');
-            $table->string('bar_certificate');
-            $table->string('no_dues_cert_from_high_court');
-            $table->string('no_dues_cert_from_sindh_bar');
-            $table->boolean('application_fee_paid')->default(false);
-            $table->boolean('submission_fee_paid')->default(false);
-            $table->enum('status', ['draft', 'submitted', 'approved', 'rejected'])
+            $table->string('vakalatnama')->nullable();
+            $table->string('case_order')->nullable();
+            $table->string('fee_challan_of_bar_card')->nullable();
+            $table->string('bar_certificate')->nullable();
+            $table->string('no_dues_cert_from_high_court')->nullable();
+            $table->string('no_dues_cert_from_sindh_bar')->nullable();
+            $table->boolean('application_fee_paid')->nullable()->default(false);
+            $table->boolean('submission_fee_paid')->nullable()->default(false);
+            $table->enum('status', ['draft', 'submitted', 'approved', 'rejected'])->nullable()
                     ->default('draft');
             $table->timestamps();
             $table->unique(['election_id', 'position_id', 'user_id']);

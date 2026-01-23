@@ -73,7 +73,7 @@ class ElectionPaymentController extends Controller
         }
 
         $validator = Validator::make($request->all(), [
-            'position_id'     => 'required|exists:election_positions,id',
+            // 'position_id'     => 'required|exists:election_positions,id',
             'transaction_id' => 'required|string'
         ]);
 
@@ -86,7 +86,7 @@ class ElectionPaymentController extends Controller
 
         $application = ElectionApplication::where([
             'election_id' => $election->id,
-            'position_id' => $request->position_id,
+            // 'position_id' => $request->position_id,
             'user_id'     => $request->user()->id,
         ])->first();
 

@@ -34,16 +34,16 @@ class ElectionApplicationController extends Controller
         $application = ElectionApplication::create([
             'election_id' => $election->id,
             'user_id'     => $request->user()->id,
-            'status'      => 'draft'
+            'status'      => 'draft',
         ]);
-        $electionfee = $election->application_fee;
-        ElectionPayment::create([
-            'election_id' => $election->id,
-            'user_id'     => $request->user()->id,
-            'type'        => 'application_fee',
-            'amount'      => $electionfee,
-            'status'      => 'pending'
-        ]);
+        // $electionfee = $election->application_fee;
+        // ElectionPayment::create([
+        //     'election_id' => $election->id,
+        //     'user_id'     => $request->user()->id,
+        //     'type'        => 'application_fee',
+        //     'amount'      => $electionfee,
+        //     'status'      => 'pending'
+        // ]);
         return response()->json([
             'status' => true,
             'message' => 'Application started successfully',
@@ -75,7 +75,7 @@ class ElectionApplicationController extends Controller
 
         $application = ElectionApplication::where([
             'election_id' => $election->id,
-            'position_id' => $request->position_id,
+            // 'position_id' => $request->position_id,
             'user_id'     => $request->user()->id,
         ])->first();
 
@@ -115,6 +115,7 @@ class ElectionApplicationController extends Controller
         }
 
         $application->update(array_merge($paths, [
+            'position_id'=>$request->position_id,
             'status' => 'submitted'
         ]));
 
