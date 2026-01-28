@@ -31,6 +31,7 @@ class CommitteeController extends Controller
             'users'        => 'nullable|array|min:1',
             'users.*'      => 'nullable|exists:users,id',
             'chairman_id'  => 'required|integer|exists:users,id',
+            'focal_person_id'  => 'nullable|integer|exists:users,id',
         ]);
 
         if ($validator->fails()) {
@@ -68,11 +69,14 @@ class CommitteeController extends Controller
                 $members = [];
                 foreach ($request->users as $userId) {
                     $members[] = [
-                        'committee_id' => $committee->id,
-                        'user_id'      => $userId,
-                        'role'         => $userId == $request->chairman_id ? 'chairman' : 'member',
-                        'created_at'   => now(),
-                        'updated_at'   => now(),
+                    'committee_id' => $committee->id,
+                    'user_id'      => $userId,
+                    'role' => $userId == $request->chairman_id ? 'chairman'
+                                : ($userId == $request->focal_person_id
+                                ? 'focal_person'
+                                : 'member'),
+                    'created_at'   => now(),
+                    'updated_at'   => now(),
                     ];
                 }
                 CommitteeMember::insert($members);
@@ -108,6 +112,7 @@ class CommitteeController extends Controller
         'users'        => 'required|array|min:1',
         'users.*'      => 'integer|exists:users,id',
         'chairman_id'  => 'required|integer|exists:users,id',
+        'focal_person_id'  => 'nullable|integer|exists:users,id',
     ]);
 
     if ($validator->fails()) {
@@ -164,7 +169,10 @@ class CommitteeController extends Controller
                 $insertData[] = [
                     'committee_id' => $committee->id,
                     'user_id'      => $userId,
-                    'role'         => $userId == $request->chairman_id ? 'chairman' : 'member',
+                    'role'         => $userId == $request->chairman_id ? 'chairman'
+                                    : ($userId == $request->focal_person_id
+                                    ? 'focal_person'
+                                    : 'member'),
                     'created_at'   => now(),
                     'updated_at'   => now(),
                 ];

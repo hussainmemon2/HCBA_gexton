@@ -103,14 +103,14 @@ class ElectionPaymentController extends Controller
                 'message' => 'Submission fee already paid'
             ], 409);
         }
-
+        
         DB::transaction(function () use ($election, $application, $request) {
 
             ElectionPayment::create([
                 'election_id'    => $election->id,
                 'user_id'        => $request->user()->id,
                 'type'           => 'submission_fee',
-                'amount'         => $election->submission_fee,
+                'amount'         => $application->position->submission_price,
                 'transaction_id'=> $request->transaction_id,
                 'payment_gateway'=> 'manual',
                 'status'         => 'paid'

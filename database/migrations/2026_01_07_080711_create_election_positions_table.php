@@ -15,7 +15,8 @@ return new class extends Migration
             $table->id();
             $table->foreignId('election_id')->constrained()->onDelete('cascade');
             $table->string('title'); // President, Vice President, Secretary
-            $table->integer('max_candidates')->default(1);
+            $table->integer('min_experience')->default(1);
+            $table->integer('submission_price');
             $table->timestamps();
         });
     }

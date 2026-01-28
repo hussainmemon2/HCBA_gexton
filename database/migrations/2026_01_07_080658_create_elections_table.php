@@ -17,7 +17,6 @@ return new class extends Migration
             $table->boolean('is_active')->default(false); // Enable / Disable election
             $table->boolean('is_complete')->default(false); // completed election
             $table->decimal('application_fee', 8, 0)->default(0); 
-            $table->decimal('submission_fee', 8, 0)->default(0);
             $table->date('start_date')->nullable();
             $table->date('end_date')->nullable();
             $table->timestamps();

@@ -13,7 +13,6 @@ class Election extends Model
         'name',
         'is_active',
         'application_fee',
-        'submission_fee',
         'start_date',
         'end_date',
     ];

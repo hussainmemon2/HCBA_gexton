@@ -5,6 +5,8 @@ namespace App\Http\Controllers\Api\Users;
 use App\Http\Controllers\Controller;
 use App\Models\Election;
 use App\Models\ElectionApplication;
+use App\Models\ElectionPosition;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\File;
@@ -71,10 +73,41 @@ class ElectionApplicationController extends Controller
                 'errors' => $validator->errors()
             ], 422);
         }
+        $user = $request->user();
+        if (!$user->date_of_enrollment_as_advocate_high_court) {
+            return response()->json([
+                'status' => false,
+                'message' => 'Enrollment date not found'
+            ], 403);
+        }
 
+        $experienceYears = Carbon::parse(
+            $user->date_of_enrollment_as_advocate_high_court
+        )->diffInYears(now());
+  
+    //  * Check position eligibility
+    
+        $position = ElectionPosition::where([
+            'id' => $request->position_id,
+            'election_id' => $election->id,
+        ])->first();
+
+        if (!$position) {
+            return response()->json([
+                'status' => false,
+                'message' => 'Invalid position for this election'
+            ], 404);
+        }
+
+        if ($experienceYears < $position->min_experience) {
+            return response()->json([
+                'status' => false,
+                'message' => "Minimum {$position->min_experience} years experience required for this position"
+            ], 403);
+        }
+        
         $application = ElectionApplication::where([
             'election_id' => $election->id,
-            // 'position_id' => $request->position_id,
             'user_id'     => $request->user()->id,
         ])->first();
 

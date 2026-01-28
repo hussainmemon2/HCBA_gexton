@@ -14,7 +14,9 @@ class ElectionPositionController extends Controller
     {
         $validator = Validator::make($request->all(), [
             'title' => 'required|string|max:255',
-            'max_candidates' => 'required|integer|min:1',
+            'min_experience' => 'required|integer|min:1',
+            'submission_price' => 'required|integer|min:1',
+
         ]);
 
         if ($validator->fails()) {
@@ -36,7 +38,8 @@ class ElectionPositionController extends Controller
         $position = ElectionPosition::create([
             'election_id' => $election->id,
             'title' => $request->title,
-            'max_candidates' => $request->max_candidates,
+            'min_experience' => $request->min_experience,
+            'submission_price' => $request->submission_price,
         ]);
 
         return response()->json([
@@ -49,7 +52,8 @@ class ElectionPositionController extends Controller
     {
         $validator = Validator::make($request->all(), [
             'title' => 'required|string|max:255',
-            'max_candidates' => 'required|integer|min:1',
+            'min_experience' => 'required|integer|min:1',
+            'submission_price' => 'required|integer|min:1',
         ]);
         if ($validator->fails()) {
             return response()->json([
@@ -66,7 +70,8 @@ class ElectionPositionController extends Controller
         }
         $position->update([
             'title' => $request->title,
-            'max_candidates' => $request->max_candidates,
+            'min_experience' => $request->min_experience,
+            'submission_price' => $request->submission_price,
         ]);
         return response()->json([
             'status' => true,

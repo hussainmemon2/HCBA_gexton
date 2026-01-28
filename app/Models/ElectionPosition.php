@@ -13,7 +13,8 @@ class ElectionPosition extends Model
     protected $fillable = [
         'election_id',
         'title',
-        'max_candidates',
+        'submission_price',
+        'min_experience'
     ];
 
 
