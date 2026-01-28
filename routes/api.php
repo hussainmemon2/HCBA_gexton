@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Api\StickerController;
 use App\Http\Controllers\Api\Users\ProfileController;
 use App\Http\Controllers\Library\BorrowingLibraryItemController;
 use App\Http\Controllers\Library\LibraryItemsController;
@@ -10,6 +11,9 @@ use Illuminate\Support\Facades\Route;
 Route::middleware('api.auth')->group(function () {
     Route::controller(UserController::class)->prefix('user')->group(function () {
         Route::post('fetchUserViaCnic', 'fetchUserViaCnic')->name('fetchUserViaCnic');
+    });
+    Route::controller(StickerController::class)->prefix('stickers')->group(function () {
+        Route::get('/', 'index');
     });
     Route::controller(LibraryItemsController::class)->prefix('library-items')->group(function () {
         Route::get('index', 'index')->name('index');
