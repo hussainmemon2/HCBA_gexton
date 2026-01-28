@@ -12,6 +12,7 @@ use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
 use App\Models\User;
+use App\Models\ValidAdvocate;
 use Illuminate\Support\Facades\Mail;
 
 class SignUpController extends Controller
@@ -106,6 +107,7 @@ class SignUpController extends Controller
             mkdir($path, 0755, true);
         }
 
+       
         // Upload CNIC Front
         $cnicFrontName = 'cnic_front_' . time() . '.' . $request->cnic_front_image->getClientOriginalExtension();
         $request->cnic_front_image->move($path, $cnicFrontName);
@@ -132,7 +134,11 @@ class SignUpController extends Controller
             $request->passport_image->move($path, $name);
             $passportPath = "users/files/{$cnicSlug}/{$name}";
         }
-
+        $scbaData = ValidAdvocate::where('reg_no', $request->bar_license_number)->first();
+        $scba = false;
+        if ($scbaData) {
+            $scba = true;
+        }
         // Create User
         $user = User::create([
             'proposer_name' => $request->proposer_name,
@@ -158,6 +164,8 @@ class SignUpController extends Controller
             'email' => $request->email,
             'phone' => $request->phone,
             'password' =>$request->password,
+            'is_verified_hcb' => $scba,
+            'is_verified_nadra' => $scba,
             'status' => 'active'
         ]);
 
