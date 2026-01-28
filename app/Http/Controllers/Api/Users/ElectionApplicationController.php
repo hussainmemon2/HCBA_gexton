@@ -5,7 +5,6 @@ namespace App\Http\Controllers\Api\Users;
 use App\Http\Controllers\Controller;
 use App\Models\Election;
 use App\Models\ElectionApplication;
-use App\Models\ElectionPayment;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\File;
