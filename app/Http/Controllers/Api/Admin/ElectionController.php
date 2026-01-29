@@ -45,7 +45,6 @@ class ElectionController extends Controller
         $validator = Validator::make($request->all(), [
             'name' => 'required|string|max:255',
             'application_fee' => 'required|numeric|min:0',
-            'submission_fee' => 'required|numeric|min:0',
             'start_date' => 'required|date',
             'end_date' => 'required|date|after_or_equal:start_date',
         ]);
@@ -62,7 +61,6 @@ class ElectionController extends Controller
         $election = Election::create([
             'name' => $request->name,
             'application_fee' => $request->application_fee,
-            'submission_fee' => $request->submission_fee,
             'start_date' => $request->start_date,
             'end_date' => $request->end_date,
             'is_active' => true,

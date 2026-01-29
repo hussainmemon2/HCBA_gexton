@@ -28,8 +28,8 @@ class CommitteeController extends Controller
         $validator = Validator::make($request->all(), [
             'name'         => 'required|string|max:255',
             'description'  => 'nullable|string',
-            'users'        => 'nullable|array|min:1',
-            'users.*'      => 'nullable|exists:users,id',
+            'users'        => 'required|array|min:1',
+            'users.*'      => 'required|exists:users,id',
             'chairman_id'  => 'required|integer|exists:users,id',
             'focal_person_id'  => 'nullable|integer|exists:users,id',
         ]);
@@ -47,7 +47,12 @@ class CommitteeController extends Controller
                 'message' => 'Chairman must be included in users list'
             ], 422);
         }
-
+        if (!in_array($request->focal_person_id, $request->users)) {
+            return response()->json([
+                'status' => false,
+                'message' => 'Focal person must be included in users list'
+            ], 422);
+        }
         try {
             DB::transaction(function () use ($request) {
 
@@ -56,16 +61,7 @@ class CommitteeController extends Controller
                     'description' => $request->description,
                 ]);
 
-                // $existingUsers = CommitteeMember::whereIn('user_id', $request->users)
-                //     ->pluck('user_id')
-                //     ->toArray();
-
-                // if (!empty($existingUsers)) {
-                //     throw new \Exception(
-                //         'Users already assigned to a committee: ' . implode(', ', $existingUsers)
-                //     );
-                // }
-
+                
                 $members = [];
                 foreach ($request->users as $userId) {
                     $members[] = [
@@ -129,6 +125,12 @@ class CommitteeController extends Controller
         ], 422);
     }
 
+    if (!in_array($request->focal_person_id, $request->users)) {
+        return response()->json([
+            'status' => false,
+            'message' => 'Focal person must be included in users list'
+        ], 422);
+    }
     try {
         DB::transaction(function () use ($request, $id) {
 
@@ -194,6 +196,14 @@ class CommitteeController extends Controller
             CommitteeMember::where('committee_id', $committee->id)
                 ->where('user_id', $request->chairman_id)
                 ->update(['role' => 'chairman']);
+
+                
+            if ($request->focal_person_id) {
+                CommitteeMember::where('committee_id', $committee->id)
+                    ->where('user_id', $request->focal_person_id)
+                    ->update(['role' => 'focal_person']);
+            }
+
         });
 
         return response()->json([

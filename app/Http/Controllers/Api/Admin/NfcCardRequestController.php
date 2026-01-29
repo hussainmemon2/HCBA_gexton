@@ -16,7 +16,7 @@ class NfcCardRequestController extends Controller
 
     public function index()
     {
-        $requests = NfcCardRequest::with('user')
+        $requests = NfcCardRequest::with('user:id,name,email,cnic')
             ->where('status', 'pending')
             ->latest()
             ->get();

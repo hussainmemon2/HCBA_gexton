@@ -15,7 +15,7 @@ class NfcCardController extends Controller
     {
         return response()->json([
             'status' => true,
-            'data' => NfcCard::with('user')->latest()->get()
+            'data' => NfcCard::with('user:id,name,email,cnic')->latest()->get()
         ]);
     }
 
