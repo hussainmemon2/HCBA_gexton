@@ -35,7 +35,7 @@ class ComplaintController extends Controller
         elseif ($isChairman || $this->isFocalPerson($user)) {
 
         $committeeIds = $user->committees()
-        ->whereIn('committee_user.role', ['chairman', 'focal_person'])
+        ->whereIn('committee_members.role', ['chairman', 'focal_person'])
         ->pluck('committees.id');
 
         $query->whereIn('committee_id', $committeeIds);
@@ -65,7 +65,7 @@ class ComplaintController extends Controller
                 ($isChairman || $isFocal) &&
                 $user->committees()
                     ->where('committee_id', $complaint->committee_id)
-                    ->whereIn('committee_user.role', ['chairman', 'focal_person'])
+                    ->whereIn('committee_members.role', ['chairman', 'focal_person'])
                     ->exists()
             ) || $user->role == 'admin',
                 'can_close' => $isChairman &&
