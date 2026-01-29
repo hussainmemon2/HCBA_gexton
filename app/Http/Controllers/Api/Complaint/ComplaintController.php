@@ -32,11 +32,11 @@ class ComplaintController extends Controller
         if ($user->role == 'admin') {
         // Admin can see all complaints
         }
-        elseif ($isChairman) {
+        elseif ($isChairman || $this->isFocalPerson($user)) {
 
         $committeeIds = $user->committees()
-            ->wherePivot('role', 'chairman')
-            ->pluck('committees.id');
+        ->whereIn('committee_user.role', ['chairman', 'focal_person'])
+        ->pluck('committees.id');
 
         $query->whereIn('committee_id', $committeeIds);
         }
@@ -45,13 +45,13 @@ class ComplaintController extends Controller
         }
 
         $complaints = $query->get();
-
+        
         return response()->json([
         'status'      => true,
         'is_chairman' => $isChairman,
         'is_admin'    => $user->role == 'admin',
         'data'        => $complaints->map(function ($complaint) use ($user, $isChairman) {
-
+            $isFocal = $this->isFocalPerson($user, $complaint->committee_id);
             return [
                 'id'          => $complaint->id,
                 'title'       => $complaint->title,
@@ -61,12 +61,13 @@ class ComplaintController extends Controller
                 'creator'     => $complaint->creator,
                 'attachments' => $complaint->attachments,
                 'can_transfer' => $isChairman || $user->role == 'admin',
-                'can_add_remark' => $isChairman &&
-                    $user->committees()
-                        ->wherePivot('role', 'chairman')
-                        ->where('committee_id', $complaint->committee_id)
-                        ->exists() || $user->role == 'admin',
-
+                'can_add_remark' => (
+                ($isChairman || $isFocal) &&
+                $user->committees()
+                    ->where('committee_id', $complaint->committee_id)
+                    ->whereIn('committee_user.role', ['chairman', 'focal_person'])
+                    ->exists()
+            ) || $user->role == 'admin',
                 'can_close' => $isChairman &&
                     $user->committees()
                         ->wherePivot('role', 'chairman')
@@ -234,10 +235,12 @@ class ComplaintController extends Controller
             ->where('committee_id', $complaint->committee_id)
             ->exists();
 
-        if (! $isChairmanOfCommittee && $user->role != 'admin') {
+        $isFocalPerson = $this->isFocalPerson($user, $complaint->committee_id);
+
+        if (! $isChairmanOfCommittee && ! $isFocalPerson && $user->role != 'admin') {
             return response()->json([
                 'status' => false,
-                'message' => 'Only committee chairman and admin can add remarks'
+                'message' => 'Only committee chairman, focal person or admin can add remarks'
             ], 403);
         }
         if ($complaint->status === 'closed' && $complaint->user_satisfied === true) {
@@ -249,7 +252,9 @@ class ComplaintController extends Controller
 
         $complaint->remarks()->create([
             'user_id' => $user->id,
-            'role'    => $user->role == 'admin' ? 'admin' : 'chairman',
+            'role' => $user->role == 'admin'
+                    ? 'admin'
+                    : ($isChairmanOfCommittee ? 'chairman' : 'focal_person'),
             'remark'  => $request->remark,
         ]);
 
@@ -279,15 +284,15 @@ class ComplaintController extends Controller
             ->exists();
 
         $isOwner = $complaint->created_by === $user->id;
-
-        if (! $isChairman && ! $isOwner && $user->role != 'admin') {
+        $isFocalPerson = $this->isFocalPerson($user, $complaint->committee_id);
+        if (! $isChairman && ! $isOwner && ! $isFocalPerson && $user->role != 'admin') {
             return response()->json([
                 'status' => false,
                 'message' => 'Unauthorized'
             ], 403);
         }
 
-        $canAddRemark = $isChairman || $user->role == 'admin';
+        $canAddRemark = $isChairman || $isFocalPerson || $user->role == 'admin';
         $canClose     = $isChairman || $user->role == 'admin';
         $canTransfer = $isChairman || $user->role === 'admin';
 
@@ -576,6 +581,16 @@ class ComplaintController extends Controller
         if (!file_exists($path)) {
             mkdir($path, 0755, true);
         }
+    }
+    private function isFocalPerson($user, $committeeId = null)
+    {
+        $query = $user->committees()->wherePivot('role', 'focal_person');
+
+        if ($committeeId) {
+            $query->where('committee_id', $committeeId);
+        }
+
+        return $query->exists();
     }
 
 }
