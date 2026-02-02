@@ -84,9 +84,9 @@ class ElectionApplicationController extends Controller
         $experienceYears = Carbon::parse(
             $user->date_of_enrollment_as_advocate_high_court
         )->diffInYears(now());
-  
+
     //  * Check position eligibility
-    
+
         $position = ElectionPosition::where([
             'id' => $request->position_id,
             'election_id' => $election->id,
@@ -105,7 +105,7 @@ class ElectionApplicationController extends Controller
                 'message' => "Minimum {$position->min_experience} years experience required for this position"
             ], 403);
         }
-        
+
         $application = ElectionApplication::where([
             'election_id' => $election->id,
             'user_id'     => $request->user()->id,

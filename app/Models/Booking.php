@@ -11,6 +11,7 @@ class Booking extends Model
         'auditorium_id',
         'title',
         'booking_date',
+        'status',
         'booked_by'
     ];
     protected $casts = [

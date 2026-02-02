@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api\Booking;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\BookingRequest;
+use App\Models\Auditorium;
 use App\Models\Booking;
 use App\Models\User;
 use Carbon\Carbon;
@@ -27,10 +28,11 @@ class BookingControlller extends Controller
             ->map(function ($booking) {
                 return [
                     'auditorium' => $booking->auditorium,
-                    'user'  => $booking->user,         // or $booking->user->name if you want just the name
+                    'user' => $booking->user,         // or $booking->user->name if you want just the name
+                    'id' => $booking->id,
                     'title' => $booking->title,
                     'status' => $booking->status,
-                    'booking_date'  => $booking->booking_date->format('Y-m-d'), // ensure consistent format
+                    'booking_date' => $booking->booking_date->format('Y-m-d'), // ensure consistent format
                 ];
             });
 
@@ -47,9 +49,17 @@ class BookingControlller extends Controller
 
         // 5. Final response: booked items + available dates list
         return response()->json([
-            'booked'   => $bookedItems,     // your original mapped bookings
-            'available_dates' => $availableDates, // only the free dates
+            'booked' => $bookedItems,
+            'available_dates' => $availableDates,
         ]);
+    }
+
+    public function getDatesAuditoriuWise(Auditorium $auditoriumId)
+    {
+        $today = Carbon::today();
+        $endDate = $today->copy()->addMonths(2);
+        $getAllBookings = Booking::where('auditorium_id', $auditoriumId)->get();
+
     }
 
     /**
@@ -61,7 +71,7 @@ class BookingControlller extends Controller
         $isAdmin = $request->user()->role === 'admin';
         if ($isAdmin) {
             $user = User::where('cnic', $validated['cnic_number'])->where('role', 'member')->first();
-            if (!$user) {
+            if (! $user) {
                 return response()->json([
                     'message' => 'User must be a member',
                 ], 404);
@@ -72,6 +82,7 @@ class BookingControlller extends Controller
         }
         $validated['booked_by'] = $request->user()->id;
         $latestBooking = Booking::create($validated);
+
         return response()->json([
             'message' => 'Event Booked Successfully.',
             'data' => [
@@ -87,12 +98,13 @@ class BookingControlller extends Controller
     {
         $validated = $request->validated();
         $booking = Booking::find($id);
-        if (!$booking) {
+        if (! $booking) {
             return response()->json([
                 'message' => 'Event Booking not found.',
             ], 404);
         }
         $booking->update($validated);
+
         return response()->json([
             'message' => 'Booking Event updated successfully.',
             'data' => $booking->refresh(),
@@ -105,21 +117,23 @@ class BookingControlller extends Controller
     public function destroy($id)
     {
         $booking = Booking::find($id);
-        if (!$booking) {
+        if (! $booking) {
             return response()->json([
                 'message' => 'Event Booking not found.',
             ], 404);
         }
         $booking->delete();
+
         return response()->json([
             'message' => 'Requested Booking Event removed successfully.',
             'data' => $booking->refresh(),
         ], 200);
     }
+
     public function updateStatus(Request $request, $id)
     {
         $booking = Booking::find($id);
-        if (!$booking) {
+        if (! $booking) {
             return response()->json([
                 'message' => 'Event Booking not found.',
             ], 404);
@@ -129,9 +143,10 @@ class BookingControlller extends Controller
         ]);
 
         $booking->update($validated);
+
         return response()->json([
             'message' => 'Status updated successfully.',
-            'data' => $claim->load(['claimer', 'user', 'attachments', 'remarks']),
+            'data' => $booking->refresh(),
         ], 200);
     }
 }

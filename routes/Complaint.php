@@ -13,5 +13,4 @@ Route::middleware(['api.auth' , 'apiRole:admin,member,president,vice-president,g
     Route::post('/satisfaction-feedback/{id}' , 'respondSatisfaction');
     Route::post('/transfer/{id}' , 'transfer');
     Route::post('/reject/{id}' , 'reject');
-    
 });

@@ -12,38 +12,37 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Validator;
 
-
 class LoginController extends Controller
 {
     public function login(Request $request)
     {
         $validator = Validator::make($request->all(), [
-            'cnic'    => 'required|string', 
+            'cnic' => 'required|string',
             'password' => 'required|string',
         ]);
 
         if ($validator->fails()) {
             return response()->json([
                 'status' => 'error',
-                'errors' => $validator->errors()
+                'errors' => $validator->errors(),
             ], 422);
         }
 
         $user = User::where('cnic', $request->cnic)
             ->first();
 
-        if (!$user || !Hash::check($request->password, $user->password)) {
+        if (! $user || ! Hash::check($request->password, $user->password)) {
             return response()->json([
                 'status' => 'error',
-                'message' => 'Invalid credentials.'
+                'message' => 'Invalid credentials.',
             ], 401);
         }
 
-        if (!$user->email_verified) {
+        if (! $user->email_verified) {
             return response()->json([
                 'status' => 'error',
                 'message' => 'Please verify your email first.',
-                "email"=>$user->email
+                'email' => $user->email,
             ], 403);
         }
 
@@ -55,98 +54,102 @@ class LoginController extends Controller
         $otpCode = rand(100000, 999999);
 
         Otp::create([
-            'user_id'    => $user->id,
+            'user_id' => $user->id,
             'identifier' => $user->email,
-            'otp'        => Hash::make($otpCode),
-            'type'       => 'login',
+            'otp' => Hash::make($otpCode),
+            'type' => 'login',
             'expires_at' => now()->addMinutes(5),
         ]);
 
-         Mail::to($user->email)
-        ->queue( new LoginOtpMail($otpCode, $user->name));
+        Mail::to($user->email)
+            ->queue(new LoginOtpMail($otpCode, $user->name));
 
         return response()->json([
-            'status'  => 'success',
+            'status' => 'success',
             'message' => 'OTP sent. Please verify to continue login.',
-            "email"   => $user->email,
-            'otp'     => $otpCode
+            'email' => $user->email,
+            'otp' => $otpCode,
         ], 200);
+        // first otp generates here
     }
+
     public function sendotp(Request $request)
     {
-    $validator = Validator::make($request->all(), [
-        'email' => 'required|email|exists:users,email',
-    ]);
-
-    if ($validator->fails()) {
-        return response()->json([
-            'status' => 'error',
-            'errors' => $validator->errors()
-        ], 422);
-    }
-
-    $user = User::where('email', $request->email)->first();
-    if (!$user->email_verified) {
-        return response()->json([
-            'status' => 'error',
-            'message' => 'Email not verified.'
-        ], 403);
-    }
-    $recentOtp = Otp::where('user_id', $user->id)
-        ->where('type', "login")
-        ->where('created_at', '>=', now()->subMinutes(5))
-        ->whereNull('used_at')
-        ->first();
-
-    if ($recentOtp) {
-        return response()->json([
-            'status' => 'error',
-            'message' => 'OTP already sent. Please wait 5 minutes.'
-        ], 429);
-    }
-
-    Otp::where('user_id', $user->id)
-        ->where('type', "login")
-        ->whereNull('used_at')
-        ->update(['used_at' => now()]);
-
-    $otpCode = rand(100000, 999999);
-
-    Otp::create([
-        'user_id'    => $user->id,
-        'identifier' => $user->email,
-        'otp'        => Hash::make($otpCode),
-        'type'       => "login",
-        'expires_at' => now()->addMinutes(5),
-    ]);
-
-     Mail::to($user->email)
-        ->queue( new LoginOtpMail($otpCode, $user->name));
-
-    return response()->json([
-        'status' => 'success',
-        'message' => 'OTP resent successfully.'
-    ], 200);
-    }
-    public function verifyotp(Request $request)
-    {
+        // send otp
         $validator = Validator::make($request->all(), [
             'email' => 'required|email|exists:users,email',
-            'otp'   => 'required|digits:6',
         ]);
 
         if ($validator->fails()) {
             return response()->json([
                 'status' => 'error',
-                'errors' => $validator->errors()
+                'errors' => $validator->errors(),
+            ], 422);
+        }
+
+        $user = User::where('email', $request->email)->first();
+        if (! $user->email_verified) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Email not verified.',
+            ], 403);
+        }
+        $recentOtp = Otp::where('user_id', $user->id)
+            ->where('type', 'login')
+            ->where('created_at', '>=', now()->subMinutes(5))
+            ->whereNull('used_at')
+            ->first();
+
+        if ($recentOtp) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'OTP already sent. Please wait 5 minutes.',
+            ], 429);
+        }
+
+        Otp::where('user_id', $user->id)
+            ->where('type', 'login')
+            ->whereNull('used_at')
+            ->update(['used_at' => now()]);
+
+        $otpCode = rand(100000, 999999);
+
+        Otp::create([
+            'user_id' => $user->id,
+            'identifier' => $user->email,
+            'otp' => Hash::make($otpCode),
+            'type' => 'login',
+            'expires_at' => now()->addMinutes(5),
+        ]);
+
+        Mail::to($user->email)
+            ->queue(new LoginOtpMail($otpCode, $user->name));
+
+        return response()->json([
+            'status' => 'success',
+            'message' => 'OTP resent successfully.',
+        ], 200);
+    }
+
+    public function verifyotp(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'email' => 'required|email|exists:users,email',
+            'otp' => 'required|digits:6',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'status' => 'error',
+                'errors' => $validator->errors(),
             ], 422);
         }
 
         $user = User::with('committees')->where('email', $request->email)->first();
 
-        if (!$user) {
+        if (! $user) {
             return response()->json([
-                'status'  => 'error',
+                'status' => 'error',
                 'message' => 'User not found.',
             ], 404);
         }
@@ -156,16 +159,16 @@ class LoginController extends Controller
             ->latest()
             ->first();
 
-        if (!$otp || !Hash::check($request->otp, $otp->otp)) {
+        if (! $otp || ! Hash::check($request->otp, $otp->otp)) {
             return response()->json([
-                'status'  => 'error',
+                'status' => 'error',
                 'message' => 'Invalid OTP.',
             ], 400);
         }
 
         if (now()->greaterThan($otp->expires_at)) {
             return response()->json([
-                'status'  => 'error',
+                'status' => 'error',
                 'message' => 'OTP has expired.',
             ], 400);
         }
@@ -176,10 +179,10 @@ class LoginController extends Controller
         // Prepare committees data
         $committees = $user->committees->map(function ($committee) {
             return [
-                'committee_id'   => $committee->id,
+                'committee_id' => $committee->id,
                 'committee_name' => $committee->name,
                 'committee_role' => $committee->pivot->role,
-                'is_chairman'    => $committee->pivot->role === 'chairman',
+                'is_chairman' => $committee->pivot->role === 'chairman',
             ];
         });
 
@@ -187,7 +190,7 @@ class LoginController extends Controller
 
         $userArray = $user->toArray();
         $userArray['is_chairman'] = $isChairman;
-        $userArray['committees']  = $committees->values();
+        $userArray['committees'] = $committees->values();
 
         if ($user->annual_fee_paid != 1 && $user->role === 'member') {
             $userArray['annual_fee_amount'] = FeeSetting::value('annual_fee');
@@ -196,10 +199,10 @@ class LoginController extends Controller
         $token = $user->createToken('login_token')->plainTextToken;
 
         return response()->json([
-            'status'  => 'success',
+            'status' => 'success',
             'message' => 'Login successful.',
-            'token'   => $token,
-            'user'    => $userArray,
+            'token' => $token,
+            'user' => $userArray,
         ], 200);
     }
 }

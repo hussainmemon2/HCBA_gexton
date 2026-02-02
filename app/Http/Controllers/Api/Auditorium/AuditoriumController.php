@@ -24,7 +24,8 @@ class AuditoriumController extends Controller
             return [
                 'id' => $item->id,
                 'title' => $item->title,
-                'price' => $item->price
+                'price' => $item->price,
+                'description' => $item->description
             ];
         });
 

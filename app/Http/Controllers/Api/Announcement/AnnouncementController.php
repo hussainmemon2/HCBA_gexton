@@ -92,7 +92,7 @@ class AnnouncementController extends Controller
                 'posted_by' => $user->id,
                 'posted_at' => now(),
                 'committee_id' => $committeeId,
-                'attachment' => $filename ?? null
+                'attachment' => $filename ?? null,
             ]);
 
             DB::commit();
@@ -140,7 +140,7 @@ class AnnouncementController extends Controller
         $isAdmin = $user->role == 'admin';
 
         // Only poster or admin can update
-        if ($announcement->posted_by !== $user->id && !$isAdmin) {
+        if ($announcement->posted_by !== $user->id && ! $isAdmin) {
             return response()->json([
                 'status' => false,
                 'message' => 'Unauthorized',
@@ -149,20 +149,20 @@ class AnnouncementController extends Controller
 
         // Handle committee logic only if type is being updated to committee
         if ($request->filled('type') && $request->type === 'committee') {
-            if (!$request->has('committee_id')) {
+            if (! $request->has('committee_id')) {
                 return response()->json([
                     'status' => false,
                     'message' => 'committee_id is required when updating to committee type',
                 ], 400);
             }
 
-            if (!$isAdmin) {
+            if (! $isAdmin) {
                 $isChairmanOfThisCommittee = $user->committees()
                     ->where('committees.id', $request->committee_id)
                     ->wherePivot('role', 'chairman')
                     ->exists();
 
-                if (!$isChairmanOfThisCommittee) {
+                if (! $isChairmanOfThisCommittee) {
                     return response()->json([
                         'status' => false,
                         'message' => 'You are not the chairman of the specified committee',
@@ -177,7 +177,7 @@ class AnnouncementController extends Controller
             // Only update fields that are present
             $data = array_filter(
                 $request->only(['title', 'type', 'content']),
-                fn($value) => ! is_null($value)
+                fn ($value) => ! is_null($value)
             );
 
             // Handle committee logic only if type is being updated

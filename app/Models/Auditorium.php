@@ -11,6 +11,7 @@ class Auditorium extends Model
         'description',
         'price'
     ];
+    protected $table = 'auditoriums';
     public function booking()
     {
         return $this->hasMany(Booking::class);

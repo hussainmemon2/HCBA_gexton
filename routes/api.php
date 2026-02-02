@@ -11,10 +11,12 @@ use Illuminate\Support\Facades\Route;
 Route::middleware('api.auth')->group(function () {
     Route::controller(UserController::class)->prefix('user')->group(function () {
         Route::post('fetchUserViaCnic', 'fetchUserViaCnic')->name('fetchUserViaCnic');
+        Route::post('verifyUserHcba', 'verifyUserHcba')->name('verifyUserHcb');
+
     });
     Route::controller(StickerController::class)->prefix('stickers')->group(function () {
         Route::get('/', 'index');
-    });
+        });
     Route::controller(LibraryItemsController::class)->prefix('library-items')->group(function () {
         Route::get('index', 'index')->name('index');
         Route::get('edit/{id}', 'edit')->name('edit');

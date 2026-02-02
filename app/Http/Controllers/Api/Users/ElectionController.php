@@ -6,7 +6,6 @@ use App\Http\Controllers\Controller;
 use App\Models\Election;
 use App\Models\ElectionApplication;
 use App\Models\ElectionCandidate;
-use App\Models\ElectionPayment;
 use Illuminate\Http\Request;
 use Carbon\Carbon;
 class ElectionController extends Controller
