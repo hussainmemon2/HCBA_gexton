@@ -24,4 +24,8 @@ class Committee extends Model
                     ->withPivot('role')
                     ->withTimestamps();
     }
+    public function vouchers()
+    {
+        return $this->hasMany(Voucher::class);
+    }
 }

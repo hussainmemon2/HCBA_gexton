@@ -163,6 +163,6 @@ class User extends Authenticatable
     public function electionPayments()
     {
         return $this->hasMany(ElectionPayment::class);
-}
+    }
 
 }

@@ -76,4 +76,8 @@ class WelfareClaim extends Model
     {
         return $this->hasMany(FinanceTransaction::class);
     }
+    public function vouchers()
+    {
+        return $this->hasMany(Voucher::class, 'welfare_request_id');
+    }
 }

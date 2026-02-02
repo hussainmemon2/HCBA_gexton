@@ -8,7 +8,7 @@ use App\Models\Committee;
 use App\Models\ComplaintRemark;
 use App\Models\ComplaintAttachment;
 use App\Models\ComplaintTransfer;
-use App\models\ComplaintHistory;
+use App\Models\ComplaintHistory;
 class Complaint extends Model
 {
   protected $fillable = [
