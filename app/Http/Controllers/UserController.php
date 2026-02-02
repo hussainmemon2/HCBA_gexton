@@ -53,7 +53,7 @@ class UserController extends Controller
     {
         $validated = $request->validate([
             'user_id' => [
-                'exists:users,id',
+                'required','exists:users,id',
             ],
         ]);
         $user = User::find($validated['user_id']);
