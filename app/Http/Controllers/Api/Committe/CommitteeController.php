@@ -47,7 +47,7 @@ class CommitteeController extends Controller
                 'message' => 'Chairman must be included in users list'
             ], 422);
         }
-        if (!in_array($request->focal_person_id, $request->users)) {
+        if (!is_null($request->focal_person_id) && !in_array($request->focal_person_id, $request->users)) {
             return response()->json([
                 'status' => false,
                 'message' => 'Focal person must be included in users list'
@@ -125,7 +125,7 @@ class CommitteeController extends Controller
         ], 422);
     }
 
-    if (!in_array($request->focal_person_id, $request->users)) {
+    if (!is_null($request->focal_person_id) && !in_array($request->focal_person_id, $request->users)) {
         return response()->json([
             'status' => false,
             'message' => 'Focal person must be included in users list'
