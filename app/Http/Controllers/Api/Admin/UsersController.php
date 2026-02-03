@@ -190,10 +190,10 @@ class UsersController extends Controller
         ], 201);
     }
 
-    public function fetchAdvocateData($reg_no)
+    public function fetchAdvocateData($reg_no , Request $request)
     {
 
-        $valid_advocate = ValidAdvocate::where('reg_no', $reg_no)->firstOrFail();
+        $valid_advocate = ValidAdvocate::where('reg_no', $reg_no)->where('subdistrict', $request->input('subdistrict'))->where('district', $request->input('district'))->firstOrFail();
 
         return response()->json([
             'validAdvocate' => $valid_advocate,

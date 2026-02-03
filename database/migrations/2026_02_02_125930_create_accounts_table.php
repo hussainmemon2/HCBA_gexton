@@ -16,7 +16,7 @@ return new class extends Migration
             $table->foreignId('account_group_id')->constrained('account_groups');
             $table->string('account_code', 20)->unique();
             $table->string('account_name', 150);
-            $table->enum('account_type', ['asset','liability','expense','income']);
+            $table->enum('account_type', ['asset','liability','expense','income','equity']);
             $table->decimal('opening_balance', 18, 2)->default(0);
             $table->decimal('current_balance', 18, 2)->default(0);
             $table->enum('status', ['active','inactive'])->default('active');
