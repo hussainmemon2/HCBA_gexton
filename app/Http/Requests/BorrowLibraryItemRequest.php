@@ -79,15 +79,8 @@ class BorrowLibraryItemRequest extends FormRequest
                 $latestBorrowing = Borrowing::where('library_item_id', $value)
                     ->latest('id')
                     ->first();
-                $alreadyReservedBySameUser = Borrowing::where('library_item_id', $value)
-                    ->latest('id')
-                    ->where('status', 'reserved')
-                    ->first();
-                if ($alreadyReservedBySameUser) {
-                    $fail('This item is already borrowed by someonelse');
-                }
 
-                if (! $latestBorrowing || $latestBorrowing->status == 'borrowed') {
+                if ($latestBorrowing && $latestBorrowing->status == 'borrowed') {
                     $fail('This item is currently borrowed,so it cannot be reserved.');
                 }
             };
@@ -106,8 +99,6 @@ class BorrowLibraryItemRequest extends FormRequest
             'user_id.exists' => 'The selected user does not exist.',
 
             'cnic_number.required' => 'CNIC number is required.',
-            // 'cnic_number.digits' => 'CNIC must be exactly 13 digits.',
-            // 'cnic_number.regex' => 'CNIC must contain only digits.',
             'cnic_number.exists' => 'The provided CNIC does not match the user\'s registered CNIC.',
 
             'date.required' => 'Expected return date is required.',

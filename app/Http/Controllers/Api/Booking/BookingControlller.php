@@ -16,14 +16,16 @@ class BookingControlller extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
         $today = Carbon::today();
         $endDate = $today->copy()->addMonths(2);
+        $user = $request->user();
+        $isAdmin = $user->role === 'admin';
 
-        // 1. Get only the booked items (your original map style)
         $bookedItems = Booking::with(['user:id,name', 'auditorium:id,title']) // eager load user relation
             ->whereBetween('booking_date', [$today, $endDate])
+            ->when(! $isAdmin, fn ($q) => $q->where('user_id', $user->id))
             ->get()
             ->map(function ($booking) {
                 return [
@@ -39,9 +41,15 @@ class BookingControlller extends Controller
         // 2. Generate all dates in the next 2 months
         $period = CarbonPeriod::create($today, $endDate);
         $allDates = collect($period)->map->format('Y-m-d')->toArray();
-
+        //  filtering booked dates because each date can have one auditorium booking only at a date by a user
+        $bookedDates = Booking::whereBetween('booking_date', [$today, $endDate])
+            ->where('status', 'approved')
+            ->pluck('booking_date')
+            ->map->format('Y-m-d')
+            ->unique()
+            ->toArray();
         // 3. Get only the dates that are already booked
-        $bookedDates = $bookedItems->where('status', 'approved')->pluck('booking_date')->toArray();
+        // $bookedDates = $bookedItems->where('status', 'approved')->pluck('booking_date')->toArray();
 
         // 4. Available dates = all dates minus booked dates
         $availableDates = array_diff($allDates, $bookedDates);
