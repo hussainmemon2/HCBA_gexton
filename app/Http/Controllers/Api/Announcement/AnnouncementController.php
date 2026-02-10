@@ -138,7 +138,10 @@ class AnnouncementController extends Controller
         $user = $request->user();
         $announcement = Announcement::findOrFail($id);
         $isAdmin = $user->role == 'admin';
-
+        $filename = null;
+        if ($request->hasFile('attachment')) {
+            $filename = FileHelper::uploadToPublic($request->file('attachment'), 'assets/announcementAttachment');
+        }
         // Only poster or admin can update
         if ($announcement->posted_by !== $user->id && ! $isAdmin) {
             return response()->json([
@@ -187,6 +190,7 @@ class AnnouncementController extends Controller
                     ? $request->committee_id
                     : null;
             }
+            $data['attachment'] = $filename;
 
             $announcement->update($data);
 

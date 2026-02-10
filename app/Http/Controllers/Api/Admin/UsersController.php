@@ -111,7 +111,6 @@ class UsersController extends Controller
             'passport_image.mimes' => 'Passport image must be jpg, jpeg, or png.',
         ]);
 
-
         if ($validator->fails()) {
             return response()->json([
                 'status' => 'error',
@@ -190,7 +189,7 @@ class UsersController extends Controller
         ], 201);
     }
 
-    public function fetchAdvocateData($reg_no , Request $request)
+    public function fetchAdvocateData($reg_no, Request $request)
     {
 
         $valid_advocate = ValidAdvocate::where('reg_no', $reg_no)->where('subdistrict', $request->input('subdistrict'))->where('district', $request->input('district'))->firstOrFail();
@@ -412,6 +411,17 @@ class UsersController extends Controller
             'status' => 'success',
             'message' => 'Account status changed successfully.',
             'data' => $user,
+        ]);
+    }
+
+    public function setDuesPaid(Request $request)
+    {
+        $request->user()->update(['dues_paid' => true]);
+
+        return response()->json([
+            'status' => 'success',
+            'message' => 'Dues Paid successfully.',
+            'data' => $request->user(),
         ]);
     }
 }
