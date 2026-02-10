@@ -16,6 +16,7 @@ Route::controller(UsersController::class)->group(function () {
 });
 Route::middleware(['api.auth', 'apiRole:admin,president,vice-president,general-secretary,joint-secretary,lib`rary-secretary'])->prefix('admin')->group(function () {
     Route::controller(UsersController::class)->prefix('users')->group(function () {
+        Route::post('makeDuesPaid', 'setDuesPaid');
         Route::get('/', 'index');
         Route::post('/create', 'store');
         Route::post('/otp/send', 'sendotp');
