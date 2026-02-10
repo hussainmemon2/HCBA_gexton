@@ -8,8 +8,6 @@ use App\Models\Borrowing;
 use App\Models\LibraryItem;
 use App\Models\User;
 
-
-
 class BorrowingLibraryItemController extends Controller
 {
     /**
@@ -65,11 +63,13 @@ class BorrowingLibraryItemController extends Controller
             if ($latestBorrowing) {
                 $validated['user_id'] = $latestBorrowing->user_id;
             }
+            $validated['date'] = date('Y-m-d');
         } elseif ($validated['status'] === 'borrowed') {
             $user = User::where('cnic', $validated['cnic_number'])->first();
             $validated['user_id'] = $user->id;
-        } else if ($validated['status'] === 'reserved') {
+        } elseif ($validated['status'] === 'reserved') {
             $validated['user_id'] = $request->user()->id;
+            $validated['date'] = date('Y-m-d');
         }
 
         $borrow = Borrowing::create($validated);
@@ -82,44 +82,5 @@ class BorrowingLibraryItemController extends Controller
         ], 201);
     }
 
-    /**
-     * Update a borrowing record (e.g., mark as returned or extend).
-     */
-    // public function update(BorrowLibraryItemRequest $request)
-    // {
-    //     $borrow = Borrowing::findOrFail($request->input('id'));
 
-    //     $borrow->update($request->except('id'));
-
-    //     // If status changed to 'returned', update library item status back to available
-    //     if ($borrow->fresh()->status === 'returned') {
-    //         LibraryItem::where('id', $borrow->library_item_id)
-    //             ->update(['status' => 'available']);
-    //     }
-
-    //     return response()->json([
-    //         'message' => 'Borrowing record updated successfully.',
-    //         'data' => $borrow->refresh()->load(['libraryItem']),
-    //     ], 200);
-    // }
-
-    /**
-     * Delete/cancel a borrowing record (admin only).
-     */
-    // public function destroy($id)
-    // {
-    //     $borrow = Borrowing::findOrFail($id);
-
-    //     // Revert item status if currently borrowed
-    //     if ($borrow->status === 'borrowed') {
-    //         LibraryItem::where('id', $borrow->library_item_id)
-    //             ->update(['status' => 'available']);
-    //     }
-
-    //     $borrow->delete();
-
-    //     return response()->json([
-    //         'message' => 'Borrowing record deleted successfully.',
-    //     ], 200);
-    // }
 }

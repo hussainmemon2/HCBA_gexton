@@ -16,7 +16,7 @@ Route::middleware('api.auth')->group(function () {
     });
     Route::controller(StickerController::class)->prefix('stickers')->group(function () {
         Route::get('/', 'index');
-        });
+    });
     Route::controller(LibraryItemsController::class)->prefix('library-items')->group(function () {
         Route::get('index', 'index')->name('index');
         Route::get('edit/{id}', 'edit')->name('edit');
@@ -46,6 +46,8 @@ Route::middleware('api.auth')->group(function () {
     });
 });
 
+
+require __DIR__.'/Public.php';
 require __DIR__.'/Auth.php';
 require __DIR__.'/Committe.php';
 require __DIR__.'/Booking.php';
