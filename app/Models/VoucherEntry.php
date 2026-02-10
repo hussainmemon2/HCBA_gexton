@@ -9,8 +9,14 @@ class VoucherEntry extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['voucher_id', 'account_id', 'entry_type', 'amount'];
+    protected $fillable = [
+        'voucher_id',
+        'account_id',
+        'entry_type', // debit / credit
+        'amount'
+    ];
 
+    // Relations
     public function voucher()
     {
         return $this->belongsTo(Voucher::class);

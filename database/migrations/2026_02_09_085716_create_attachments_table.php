@@ -11,10 +11,12 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('voucher_types', function (Blueprint $table) {
+        Schema::create('attachments', function (Blueprint $table) {
             $table->id();
-            $table->string('name', 100);
-            $table->boolean('requires_proof')->default(true);
+            $table->unsignedBigInteger('voucher_id');
+            $table->foreign('voucher_id')->references('id')->on('vouchers')->onDelete('cascade');
+            $table->string('attachment')->nullable(); 
+            $table->string('attachment_type')->nullable();
             $table->timestamps();
         });
     }
@@ -24,6 +26,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('voucher_types');
+        Schema::dropIfExists('attachments');
     }
 };

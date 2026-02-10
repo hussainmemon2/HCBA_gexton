@@ -9,7 +9,7 @@ class Attachment extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['voucher_id', 'file_path', 'file_type'];
+    protected $fillable = ['voucher_id', 'attachment', 'attachment_type'];
 
     public function voucher()
     {

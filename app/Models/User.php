@@ -55,6 +55,7 @@ class User extends Authenticatable
         'dues_paid',
         'email_verified',
         'email_verified_at',
+        'annual_fee_paid',
     ];
 
     /**
@@ -164,5 +165,8 @@ class User extends Authenticatable
     {
         return $this->hasMany(ElectionPayment::class);
     }
-
+    public function vouchers()
+    {
+        return $this->morphMany(Voucher::class, 'entity');
+    }
 }

@@ -9,7 +9,14 @@ class Checkbook extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['bank_account_id', 'start_no', 'end_no'];
+    protected $table = 'checkbooks';
+
+    protected $fillable = [
+        'bank_account_id',
+        'name',
+        'start_no',
+        'end_no',
+    ];
 
     public function bankAccount()
     {

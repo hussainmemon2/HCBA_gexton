@@ -78,6 +78,6 @@ class WelfareClaim extends Model
     }
     public function vouchers()
     {
-        return $this->hasMany(Voucher::class, 'welfare_request_id');
+        return $this->morphMany(Voucher::class, 'entity');
     }
 }

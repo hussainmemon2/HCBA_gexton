@@ -26,6 +26,6 @@ class Committee extends Model
     }
     public function vouchers()
     {
-        return $this->hasMany(Voucher::class);
+        return $this->morphMany(Voucher::class, 'entity');
     }
 }

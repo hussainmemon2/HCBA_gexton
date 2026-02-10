@@ -9,15 +9,15 @@ class Vendor extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['vendor_name', 'contact_no', 'payable_account_id'];
+    protected $fillable = [
+        'name',
+        'email',
+        'description'
+    ];
 
-    public function payableAccount()
-    {
-        return $this->belongsTo(Account::class, 'payable_account_id');
-    }
-
+    // Relations
     public function vouchers()
     {
-        return $this->hasMany(Voucher::class);
+        return $this->morphMany(Voucher::class, 'entity');
     }
 }

@@ -13,12 +13,13 @@ return new class extends Migration
     {
         Schema::create('voucher_entries', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('voucher_id')->constrained('vouchers');
-            $table->foreignId('account_id')->constrained('accounts');
-            $table->enum('entry_type', ['debit','credit']);
-            $table->decimal('amount', 18, 2);
+            $table->foreignId('voucher_id')->constrained('vouchers'); // parent voucher
+            $table->foreignId('account_id')->constrained('accounts'); // asset, expense, income, etc
+            $table->enum('entry_type', ['debit','credit']); // double-entry
+            $table->decimal('amount', 15, 0);
             $table->timestamps();
         });
+
     }
 
     /**

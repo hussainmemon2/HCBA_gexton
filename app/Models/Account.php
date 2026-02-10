@@ -10,17 +10,22 @@ class Account extends Model
     use HasFactory;
 
     protected $fillable = [
-        'account_group_id', 'account_code', 'account_name',
-        'account_type', 'opening_balance', 'current_balance', 'status',
+        'account_name',
+        'account_code',
+        'account_type', 
+        'subtype', 
+        'opening_balance',
+        'current_balance',
+        'status',
     ];
-
-    public function group()
-    {
-        return $this->belongsTo(AccountGroup::class, 'account_group_id');
-    }
 
     public function voucherEntries()
     {
-        return $this->hasMany(VoucherEntry::class, 'account_id');
+        return $this->hasMany(VoucherEntry::class);
+    }
+
+    public function checkbooks()
+    {
+        return $this->hasMany(CheckBook::class);
     }
 }

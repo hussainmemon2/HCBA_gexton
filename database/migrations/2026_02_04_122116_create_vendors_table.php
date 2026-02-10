@@ -11,16 +11,15 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('audit_logs', function (Blueprint $table) {
+        Schema::create('vendors', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('user_id')->constrained('users');
-            $table->string('action', 100);
-            $table->enum('reference_type', ['voucher','welfare','committee','vendor']);
-            $table->unsignedBigInteger('reference_id');
-            $table->string('ip_address', 45);
+            $table->string('name', 150);
+            $table->string('email')->nullable();
+            $table->string('phone')->nullable();
+            $table->string('product')->nullable();
+            $table->text('description')->nullable();
             $table->timestamps();
         });
-
     }
 
     /**
@@ -28,6 +27,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('audit_logs');
+        Schema::dropIfExists('vendors');
     }
 };

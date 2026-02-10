@@ -10,14 +10,36 @@ class Voucher extends Model
     use HasFactory;
 
     protected $fillable = [
-        'voucher_no', 'voucher_type_id', 'date', 'description', 'status',
-        'created_by', 'approved_by', 'approved_at', 'reversal_of',
-        'payment_method', 'cheque_id', 'vendor_id', 'committee_id', 'welfare_request_id'
+        'voucher_no',
+        'voucher_type', // receipt / payment
+        'date',
+        'paid_by', // member / other
+        'description',
+        'status', // draft / pending / approved / rejected
+        'payment_method', // cash / cheque / other
+        'cheque_id',
+        'title',
+        'created_by',
+        'entity_id',
+        'entity_type',
+        'approved_by',
+        'approved_at',
+        'rejected_by',
+        'rejected_at',
+        'rejection_reason',
+        'expense_account_id', // add this
+        'asset_account_id',   // add this
+   
     ];
 
-    public function type()
+    public function entity()
     {
-        return $this->belongsTo(VoucherType::class, 'voucher_type_id');
+        return $this->morphTo();
+    }
+
+    public function cheque()
+    {
+        return $this->belongsTo(Cheque::class);
     }
 
     public function entries()
@@ -25,33 +47,30 @@ class Voucher extends Model
         return $this->hasMany(VoucherEntry::class);
     }
 
-    public function cheque()
+    public function creator()
     {
-        return $this->belongsTo(Cheque::class, 'cheque_id');
+        return $this->belongsTo(User::class, 'created_by');
     }
-
-    public function vendor()
-    {
-        return $this->belongsTo(Vendor::class);
-    }
-
-    public function committee()
-    {
-        return $this->belongsTo(Committee::class);
-    }
-
-    public function welfare()
-    {
-        return $this->belongsTo(WelfareClaim::class, 'welfare_request_id');
-    }
-
     public function attachments()
     {
-        return $this->hasMany(Attachment::class);
+        return $this->hasMany(Attachment::class, 'voucher_id');
+    }
+    public function expenseAccount()
+    {
+        return $this->belongsTo(Account::class, 'expense_account_id');
+    }
+    public function assetAccount()
+    {
+        return $this->belongsTo(Account::class, 'asset_account_id');
+    }
+    public function approver()
+    {
+        return $this->belongsTo(User::class, 'approved_by');
     }
 
-    public function reversal()
+    public function rejecter()
     {
-        return $this->belongsTo(Voucher::class, 'reversal_of');
+        return $this->belongsTo(User::class, 'rejected_by');
     }
+
 }

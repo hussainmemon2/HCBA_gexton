@@ -10,22 +10,21 @@ class Cheque extends Model
     use HasFactory;
 
     protected $fillable = [
-        'bank_account_id', 'cheque_no', 'status', 
-        'voucher_id', 'used_for_type', 'used_for_id', 'used_at'
+        'checkbook_id',
+        'cheque_no',
+        'status', 
+        'used_for_type', 
+        'used_for_id'
     ];
 
+    // Relations
     public function checkbook()
     {
-        return $this->belongsTo(Checkbook::class);
-    }
-
-    public function bank()
-    {
-        return $this->belongsTo(Account::class, 'bank_account_id');
+        return $this->belongsTo(CheckBook::class);
     }
 
     public function voucher()
     {
-        return $this->belongsTo(Voucher::class);
+        return $this->morphTo();
     }
 }
