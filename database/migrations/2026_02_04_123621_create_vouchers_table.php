@@ -28,8 +28,8 @@ return new class extends Migration
             $table->unsignedBigInteger('rejected_by')->nullable();
             $table->timestamp('rejected_at')->nullable();
             $table->string('rejection_reason')->nullable();
-            $table->unsignedBigInteger('asset_account_id')->nullable()->after('voucher_type');
-            $table->unsignedBigInteger('expense_account_id')->nullable()->after('asset_account_id');
+            $table->unsignedBigInteger('asset_account_id')->nullable();
+            $table->unsignedBigInteger('expense_account_id')->nullable();
             $table->foreign('asset_account_id')->references('id')->on('accounts')->onDelete('set null');
             $table->foreign('expense_account_id')->references('id')->on('accounts')->onDelete('set null');
             // Polymorphic link to vendor/committee/welfare/member

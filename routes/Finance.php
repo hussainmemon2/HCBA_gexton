@@ -1,17 +1,14 @@
 <?php
 
 use App\Http\Controllers\Api\Finance\AccountController;
-use App\Http\Controllers\Api\Finance\AccountGroupController;
 use App\Http\Controllers\Api\Finance\CheckbookController;
-use App\Http\Controllers\Api\Finance\ChequebookController;
 use App\Http\Controllers\Api\Finance\VendorController;
 use App\Http\Controllers\Api\Finance\VoucherController;
-use App\Http\Controllers\Api\Finance\VoucherTypeController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\Finance\ReportController;
 
 
-Route::middleware(['api.auth' , 'apiRole:admin,treasurer'])->group(function () {
+Route::middleware(['api.auth' , 'apiRole:admin,treasury'])->group(function () {
 
     Route::controller(AccountController::class)->group(function () {
         Route::get('/accounts', 'index');
@@ -40,6 +37,7 @@ Route::middleware(['api.auth' , 'apiRole:admin,treasurer'])->group(function () {
         Route::get('/asset-accounts', 'getAssetAccountsByPaymentMethod');
         Route::get('/bank-checkbooks', 'getCheckbooksByBank');
         Route::get('/unused-cheques', 'getUnusedChequesByCheckbook');
+        Route::get('/expense-accounts', 'getExpenseAccounts');
     });
     Route::controller(VendorController::class)->group(function (){
         Route::get('/vendors', 'index');
@@ -58,7 +56,7 @@ Route::middleware(['api.auth' , 'apiRole:admin'])->controller(VoucherController:
  
 });
 
-Route::middleware(['api.auth', 'apiRole:admin,treasurer'])->group(function () {
+Route::middleware(['api.auth', 'apiRole:admin,treasury'])->group(function () {
     Route::get('/reports/trial-balance', [ReportController::class, 'trialBalance']);
     Route::get('/reports/ledger', [ReportController::class, 'ledger']);
     Route::get('/reports/cash-bank-book', [ReportController::class, 'cashBankBook']);

@@ -9,13 +9,15 @@ use Illuminate\Support\Facades\Validator;
 
 class AccountController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        $accounts = Account::where('status', 'active')
-            ->orderBy('account_type')
-            ->orderBy('subtype')
-            ->get();
+    $query = Account::orderBy('account_type')
+        ->orderBy('subtype');
+    if ($request->user()->role !== "admin") {
+        $query->where('status', 'active');
+    }
 
+    $accounts = $query->get();
         $grouped = $accounts->groupBy('account_type')->map(function ($accountsByType) {
             return $accountsByType->groupBy('subtype')->map(function ($accountsBySubtype) {
                 return $accountsBySubtype->map(function ($account) {
@@ -23,7 +25,8 @@ class AccountController extends Controller
                         'id' => $account->id,
                         'name' => $account->account_name,
                         'code' => $account->account_code,
-                        'current_balance' => $account->current_balance
+                        'current_balance' => $account->current_balance,
+                        'status'    =>$account->status
                     ];
                 })->values(); 
             })->toArray();

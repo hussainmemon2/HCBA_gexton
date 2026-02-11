@@ -12,7 +12,6 @@ use Illuminate\Support\Facades\Validator;
 
 class CheckbookController extends Controller
 {
-
     public function index()
     {
         $checkbooks = Checkbook::with('bankAccount')

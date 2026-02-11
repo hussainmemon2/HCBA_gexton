@@ -526,7 +526,7 @@ class VoucherController extends Controller
     public function getAssetAccountsByPaymentMethod(Request $request)
     {
         $validator = Validator::make($request->all(), [
-            'payment_method' => 'required|in:cash,cheque,other'
+            'payment_method' => 'required|in:cash,cheque,bank'
         ]);
 
         if ($validator->fails()) {
@@ -544,7 +544,7 @@ class VoucherController extends Controller
             $query->where('subtype', 'cash');
         }
 
-        if ($request->payment_method === 'cheque' || $request->payment_method === 'other') {
+        if ($request->payment_method === 'cheque' || $request->payment_method === 'bank') {
             $query->where('subtype', 'bank');
         }
 
@@ -556,4 +556,17 @@ class VoucherController extends Controller
         ]);
     }
 
+    public function getExpenseAccounts()
+    {
+        $accounts = Account::where('account_type', 'expense')
+            ->where('status', 'active')
+            ->select('id', 'account_name', 'account_code', 'account_type', 'subtype')
+            ->orderBy('account_name')
+            ->get();
+
+        return response()->json([
+            'status' => true,
+            'data' => $accounts
+        ]);
+    }
 }
