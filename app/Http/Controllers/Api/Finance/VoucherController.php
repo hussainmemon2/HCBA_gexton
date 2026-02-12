@@ -277,20 +277,91 @@ class VoucherController extends Controller
         DB::beginTransaction();
         try {
             $voucher = Voucher::lockForUpdate()->findOrFail($id);
-
             if ($voucher->status !== 'pending') {
                 return response()->json([
                     'status' => false,
                     'message' => 'Only pending vouchers can be approved'
                 ], 422);
             }
-
-            // Load all voucher entries
             $entries = $voucher->entries()->lockForUpdate()->get();
+            if ($entries->isEmpty()) {
+                return response()->json([
+                    'status' => false,
+                    'message' => 'Voucher has no entries'
+                ], 422);
+            }
+
+            foreach ($entries as $entry) {
+
+                $account = Account::lockForUpdate()->findOrFail($entry->account_id);
+
+                $normalDebitTypes = ['asset', 'expense'];
+
+                if ($entry->entry_type === 'credit') {
+
+                    // If asset or expense credited → balance will decrease
+                    if (in_array($account->account_type, $normalDebitTypes)) {
+
+                        if ($account->current_balance < $entry->amount) {
+                            throw new \Exception(
+                                "Insufficient balance in account: {$account->account_name}"
+                            );
+                        }
+                    }
+                }
+
+                if ($entry->entry_type === 'debit') {
+
+                    // If income/liability/equity debited → balance will decrease
+                    if (!in_array($account->account_type, $normalDebitTypes)) {
+
+                        if ($account->current_balance < $entry->amount) {
+                            throw new \Exception(
+                                "Insufficient balance in account: {$account->account_name}"
+                            );
+                        }
+                    }
+                }
+            }
+
+            foreach ($entries as $entry) {
+
+                $account = Account::lockForUpdate()->findOrFail($entry->account_id);
+
+                $normalDebitTypes = ['asset', 'expense'];
+
+                if ($entry->entry_type === 'debit') {
+
+                    if (in_array($account->account_type, $normalDebitTypes)) {
+                        // Asset & Expense increase on debit
+                        $account->current_balance += $entry->amount;
+                    } else {
+                        // Income, Liability, Equity decrease on debit
+                        $account->current_balance -= $entry->amount;
+                    }
+
+                } else { // credit
+
+                    if (in_array($account->account_type, $normalDebitTypes)) {
+                        // Asset & Expense decrease on credit
+                        $account->current_balance -= $entry->amount;
+                    } else {
+                        // Income, Liability, Equity increase on credit
+                        $account->current_balance += $entry->amount;
+                    }
+                }
+
+                $account->save();
+            }
+
+
             if ($voucher->entity_type === 'welfare' && $voucher->entity_id) {
+
                 $welfare = WelfareClaim::lockForUpdate()->find($voucher->entity_id);
+
                 if ($welfare) {
                     $debitAmount = $entries->where('entry_type', 'debit')->sum('amount');
+
                     $welfare->update([
                         'status' => 'ready',
                         'amount' => $debitAmount
@@ -298,23 +369,14 @@ class VoucherController extends Controller
                 }
             }
 
-            foreach ($entries as $entry) {
-                $account = Account::lockForUpdate()->findOrFail($entry->account_id);
 
-                // Update balance according to debit/credit
-                if ($entry->entry_type === 'debit') {
-                    $account->current_balance += $entry->amount;
-                } else { // credit
-                    $account->current_balance -= $entry->amount;
-                }
-
-                $account->save();
-            }
-
-            // Handle cheque if payment voucher
-            if ($voucher->voucher_type === 'payment' && $voucher->payment_method === 'cheque' && $voucher->cheque_id) {
+            if (
+                $voucher->voucher_type === 'payment' &&
+                $voucher->payment_method === 'cheque' &&
+                $voucher->cheque_id
+            ) {
                 $cheque = Cheque::where('id', $voucher->cheque_id)
-                    ->where('status', 'reserved') // reserved at voucher creation
+                    ->where('status', 'reserved')
                     ->lockForUpdate()
                     ->first();
 
@@ -327,14 +389,14 @@ class VoucherController extends Controller
                 }
             }
 
-            // Update voucher status
+
             $voucher->update([
                 'status' => 'approved',
                 'approved_by' => $request->user()->id,
                 'approved_at' => now()
             ]);
 
-            // Audit log
+
             AuditLog::create([
                 'user_id' => $request->user()->id,
                 'action' => 'voucher_approved',
@@ -349,14 +411,18 @@ class VoucherController extends Controller
                 'status' => true,
                 'message' => 'Voucher approved successfully'
             ]);
+
         } catch (\Exception $e) {
+
             DB::rollBack();
+
             return response()->json([
                 'status' => false,
                 'error' => $e->getMessage()
             ], 500);
         }
     }
+
 
     public function reject(Request $request, $id)
     {

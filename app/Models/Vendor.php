@@ -12,7 +12,9 @@ class Vendor extends Model
     protected $fillable = [
         'name',
         'email',
-        'description'
+        'description',
+        'product',
+        'phone'
     ];
 
     // Relations
